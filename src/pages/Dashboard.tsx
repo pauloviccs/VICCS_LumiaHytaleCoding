@@ -25,14 +25,24 @@ import { useLangStore } from '@/store/langStore';
 export default function Dashboard() {
     const { user, profile, signOut } = useAuthStore();
     const { setView } = useViewStore();
-    const { courses, fetchCourses } = useCourseStore();
+    const {
+        courses,
+        fetchCourses,
+        fetchUserProgress,
+        getRecentActivity,
+        getCourseProgress,
+        isModuleLocked
+    } = useCourseStore();
     const { t, language, setLanguage } = useLangStore();
     const [activeTab, setActiveTab] = useState('overview');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     useEffect(() => {
         fetchCourses();
-    }, [fetchCourses]);
+        if (user) {
+            fetchUserProgress(user.id);
+        }
+    }, [fetchCourses, fetchUserProgress, user]);
 
     const activeCourse = courses[0]; // For now, just show the first course
 
@@ -182,10 +192,20 @@ export default function Dashboard() {
                                 <div className="hidden lg:block relative w-32 h-32 shrink-0">
                                     <svg className="w-full h-full -rotate-90">
                                         <circle cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-gray-800" />
-                                        <circle cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent" strokeDasharray="364" strokeDashoffset={364 - (364 * 0.15)} className="text-liquid-primary drop-shadow-[0_0_10px_rgba(0,243,255,0.5)]" />
+                                        <circle
+                                            cx="64"
+                                            cy="64"
+                                            r="58"
+                                            stroke="currentColor"
+                                            strokeWidth="8"
+                                            fill="transparent"
+                                            strokeDasharray="364"
+                                            strokeDashoffset={364 - (364 * (getCourseProgress(activeCourse?.id) / 100))}
+                                            className="text-liquid-primary drop-shadow-[0_0_10px_rgba(0,243,255,0.5)] transition-all duration-1000 ease-out"
+                                        />
                                     </svg>
                                     <div className="absolute inset-0 flex items-center justify-center flex-col">
-                                        <span className="text-2xl font-bold text-white">15%</span>
+                                        <span className="text-2xl font-bold text-white">{getCourseProgress(activeCourse?.id)}%</span>
                                     </div>
                                 </div>
                             </div>
@@ -200,18 +220,25 @@ export default function Dashboard() {
                                     <button className="text-xs text-liquid-primary hover:underline">{t('dash.view_all')}</button>
                                 </div>
                                 <div className="space-y-4">
-                                    {[1, 2, 3].map((i) => (
+                                    {getRecentActivity().map((activity, i) => (
                                         <div key={i} className="flex items-center gap-4 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer group">
                                             <div className="w-10 h-10 rounded-lg bg-black/50 flex items-center justify-center border border-white/10 group-hover:border-liquid-primary/50 transition-colors shrink-0">
                                                 <Terminal size={18} className="text-gray-400 group-hover:text-liquid-primary" />
                                             </div>
                                             <div className="min-w-0">
-                                                <div className="text-white font-medium text-sm truncate">{t('dash.completed')} "Variables"</div>
-                                                <div className="text-gray-500 text-xs">2 {t('dash.ago')} • +50 XP</div>
+                                                <div className="text-white font-medium text-sm truncate">
+                                                    {t('dash.completed')} "{activity.lessons?.title || 'Unknown'}"
+                                                </div>
+                                                <div className="text-gray-500 text-xs">
+                                                    {new Date(activity.completed_at || '').toLocaleDateString()} • +{activity.lessons?.xp_reward || 0} XP
+                                                </div>
                                             </div>
                                             <ChevronRight size={16} className="ml-auto text-gray-600 group-hover:text-white shrink-0" />
                                         </div>
                                     ))}
+                                    {getRecentActivity().length === 0 && (
+                                        <div className="text-gray-500 text-sm text-center py-4">{t('dash.no_activity')}</div>
+                                    )}
                                 </div>
                             </FluidCard>
 
@@ -219,15 +246,20 @@ export default function Dashboard() {
                             <FluidCard className="border border-white/10 opacity-70">
                                 <h3 className="text-lg md:text-xl font-bold text-white mb-6">{t('dash.upcoming')}</h3>
                                 <div className="space-y-4">
-                                    {activeCourse?.modules.slice(1).map((module: any) => (
-                                        <div key={module.id} className="p-4 border border-white/5 rounded-lg bg-black/20 flex items-center gap-4">
-                                            <Lock className="text-gray-600 shrink-0" size={20} />
-                                            <div className="min-w-0">
-                                                <div className="text-gray-400 font-medium truncate">{module.title}</div>
-                                                <div className="text-xs text-gray-600 truncate">{t('dash.locked')} • {module.description}</div>
+                                    {activeCourse?.modules.slice(1).map((module: any) => {
+                                        const locked = isModuleLocked(module.id);
+                                        return (
+                                            <div key={module.id} className={`p-4 border border-white/5 rounded-lg bg-black/20 flex items-center gap-4 ${locked ? 'opacity-50' : ''}`}>
+                                                {locked ? <Lock className="text-gray-600 shrink-0" size={20} /> : <div className="w-5 h-5 rounded-full border border-green-500/50 bg-green-500/20" />}
+                                                <div className="min-w-0">
+                                                    <div className="text-gray-400 font-medium truncate">{module.title}</div>
+                                                    <div className="text-xs text-gray-600 truncate">
+                                                        {locked ? t('dash.locked') : 'Unlocked'}
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    )) || (
+                                        );
+                                    }) || (
                                             <div className="text-gray-500 text-sm">{t('dash.no_modules')}</div>
                                         )}
                                 </div>

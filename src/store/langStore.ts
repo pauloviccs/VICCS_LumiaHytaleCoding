@@ -74,6 +74,7 @@ const translations: Record<Language, Record<string, string>> = {
         'studio.success_msg': 'Signal matches expected pattern.',
         'studio.fail_msg': 'Signal signature mismatch.',
         'studio.error_msg': 'Invalid validation pattern.',
+        'dash.no_activity': 'No recent activity recorded.',
     },
     'pt-br': {
         // Landing Page
@@ -138,6 +139,7 @@ const translations: Record<Language, Record<string, string>> = {
         'studio.success_msg': 'Sinal corresponde ao padrão esperado.',
         'studio.fail_msg': 'Assinatura do sinal incorreta.',
         'studio.error_msg': 'Padrão de validação inválido.',
+        'dash.no_activity': 'Nenhuma atividade recente registrada.',
     }
 };
 
