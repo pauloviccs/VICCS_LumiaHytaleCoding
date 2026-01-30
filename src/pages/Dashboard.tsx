@@ -27,6 +27,11 @@ export default function Dashboard() {
     const { setView } = useViewStore();
     const {
         courses,
+        fetchCourses,
+        fetchUserProgress,
+        getRecentActivity,
+        getCourseProgress,
+        isModuleLocked,
         getLastActiveCourseId
     } = useCourseStore();
     const { t, language, setLanguage } = useLangStore();
