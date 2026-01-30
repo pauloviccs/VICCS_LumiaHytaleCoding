@@ -71,7 +71,7 @@ function LandingPage() {
                             <img
                                 src={backgrounds[currentBgIndex]}
                                 alt="Hero Background"
-                                className="w-full h-full object-cover opacity-50 filter blur-[12px] mix-blend-screen"
+                                className="w-full h-full object-cover opacity-60 filter blur-[6px] mix-blend-screen"
                             />
                         </motion.div>
                     </AnimatePresence>

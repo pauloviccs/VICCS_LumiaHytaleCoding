@@ -6,7 +6,7 @@ interface GlassLayoutProps {
 
 export const GlassLayout: React.FC<GlassLayoutProps> = ({ children }) => {
     return (
-        <div className="relative min-h-screen w-full overflow-hidden bg-liquid-bg text-white selection:bg-liquid-primary/30 font-sans">
+        <div className="relative min-h-screen w-full overflow-hidden bg-transparent text-white selection:bg-liquid-primary/30 font-sans">
             {/* Animated Orbs/Aurora */}
             <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
                 <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-liquid-accent/20 blur-[120px] animate-float" />
