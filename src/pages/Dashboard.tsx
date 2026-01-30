@@ -22,7 +22,7 @@ import {
 import { useLangStore } from '@/store/langStore';
 
 export default function Dashboard() {
-    const { user, signOut } = useAuthStore();
+    const { user, profile, signOut } = useAuthStore();
     const { setView } = useViewStore();
     const { courses, fetchCourses } = useCourseStore();
     const { t, language, setLanguage } = useLangStore();
@@ -42,15 +42,15 @@ export default function Dashboard() {
                     <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-liquid-primary to-liquid-accent p-[1px]">
                         <div className="w-full h-full rounded-full bg-black flex items-center justify-center overflow-hidden">
                             <img
-                                src={user?.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/shapes/svg?seed=${user?.email}`}
+                                src={profile?.avatar_url || user?.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/shapes/svg?seed=${user?.email}`}
                                 alt="Avatar"
                                 className="w-full h-full object-cover"
                             />
                         </div>
                     </div>
                     <div>
-                        <div className="font-bold text-white text-sm truncate max-w-[120px]">{user?.user_metadata?.username || 'Agent'}</div>
-                        <div className="text-xs text-liquid-primary">Lvl 1 Initiate</div>
+                        <div className="font-bold text-white text-sm truncate max-w-[120px]">{profile?.username || user?.user_metadata?.username || 'Agent'}</div>
+                        <div className="text-xs text-liquid-primary">Lvl {profile?.level || 1} Initiate</div>
                     </div>
                 </div>
 
@@ -139,8 +139,8 @@ export default function Dashboard() {
                                     {language === 'en' ? 'EN' : 'PT-BR'}
                                 </button>
                                 <div className="hidden md:block h-6 w-px bg-white/10" />
-                                <StatCard icon={<Flame className="text-orange-500" />} value="3" label={t('dash.streak')} />
-                                <StatCard icon={<Trophy className="text-yellow-500" />} value="450" label={t('dash.xp')} />
+                                <StatCard icon={<Flame className="text-orange-500" />} value={profile?.streak || 0} label={t('dash.streak')} />
+                                <StatCard icon={<Trophy className="text-yellow-500" />} value={profile?.xp || 0} label={t('dash.xp')} />
                             </div>
                         </div>
 
