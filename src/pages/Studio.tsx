@@ -8,6 +8,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useLangStore } from '@/store/langStore';
 import { supabase } from '@/lib/supabase';
 import { SuccessModal } from '@/components/studio/SuccessModal';
+import { FluidButton } from '@/components/ui/FluidDesign';
 import type { Lesson } from '@/types';
 
 export default function Studio() {
@@ -157,12 +158,13 @@ export default function Studio() {
             {/* Top Bar */}
             <header className="h-14 border-b border-white/10 flex items-center justify-between px-4 bg-black/40 backdrop-blur-md z-10 shrink-0">
                 <div className="flex items-center gap-4">
-                    <button
+                    <FluidButton
                         onClick={() => setView('dashboard')}
-                        className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
+                        variant="ghost"
+                        className="p-2 !rounded-lg"
                     >
                         <ArrowLeft size={20} />
-                    </button>
+                    </FluidButton>
                     <div className="flex items-center gap-2 overflow-hidden">
                         <span className="text-liquid-primary font-bold whitespace-nowrap uppercase">{activeModule.title}</span>
                         <span className="text-gray-500 hidden sm:inline">/</span>
@@ -185,14 +187,15 @@ export default function Studio() {
                     >
                         <Info size={20} />
                     </button>
-                    <button
+                    <FluidButton
                         onClick={handleRun}
                         disabled={isRunning}
-                        className="flex items-center gap-2 px-3 md:px-4 py-1.5 bg-green-600 hover:bg-green-500 text-white font-bold rounded text-xs md:text-sm transition-colors disabled:opacity-50"
+                        variant="primary"
+                        className="px-3 md:px-4 py-1.5 text-xs md:text-sm disabled:opacity-50 !rounded bg-green-600 hover:bg-green-500 shadow-none border-none"
                     >
                         <Play size={14} fill="currentColor" />
                         {isRunning ? t('studio.compiling') : t('studio.run')}
-                    </button>
+                    </FluidButton>
                 </div>
             </header>
 

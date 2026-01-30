@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { GlassLayout } from '@/components/layout/GlassLayout';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FluidButton, FluidCard } from '@/components/ui/FluidDesign'; // Import Fluid Components
 import { useAuthStore } from '@/store/authStore';
 import { useViewStore } from '@/store/viewStore';
 import { useCourseStore } from '@/store/courseStore';
@@ -162,7 +163,7 @@ export default function Dashboard() {
                                     <p className="text-gray-300 max-w-xl mb-6 text-sm md:text-base">
                                         {activeCourse?.description || t('dash.syncing')}
                                     </p>
-                                    <button
+                                    <FluidButton
                                         onClick={() => {
                                             if (activeCourse?.modules?.[0]?.id) {
                                                 setView('studio', { moduleId: activeCourse.modules[0].id });
@@ -170,10 +171,11 @@ export default function Dashboard() {
                                                 setView('studio');
                                             }
                                         }}
-                                        className="w-full md:w-auto px-6 py-3 bg-white text-black font-bold rounded-lg flex items-center justify-center gap-2 hover:bg-gray-200 transition-colors shadow-lg shadow-white/10"
+                                        variant="secondary"
+                                        className="w-full md:w-auto text-black"
                                     >
                                         <Play size={18} fill="currentColor" /> {t('dash.resume')}
-                                    </button>
+                                    </FluidButton>
                                 </div>
 
                                 {/* Visual Progress Ring */}
@@ -192,7 +194,7 @@ export default function Dashboard() {
                         {/* Content Grid */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             {/* Recent Activity */}
-                            <div className="glass-panel p-6 rounded-xl border border-white/10">
+                            <FluidCard className="border border-white/10">
                                 <div className="flex justify-between items-center mb-6">
                                     <h3 className="text-lg md:text-xl font-bold text-white">{t('dash.mission_log')}</h3>
                                     <button className="text-xs text-liquid-primary hover:underline">{t('dash.view_all')}</button>
@@ -211,10 +213,10 @@ export default function Dashboard() {
                                         </div>
                                     ))}
                                 </div>
-                            </div>
+                            </FluidCard>
 
                             {/* Locked Modules */}
-                            <div className="glass-panel p-6 rounded-xl border border-white/10 opacity-70">
+                            <FluidCard className="border border-white/10 opacity-70">
                                 <h3 className="text-lg md:text-xl font-bold text-white mb-6">{t('dash.upcoming')}</h3>
                                 <div className="space-y-4">
                                     {activeCourse?.modules.slice(1).map((module: any) => (
@@ -229,7 +231,7 @@ export default function Dashboard() {
                                             <div className="text-gray-500 text-sm">{t('dash.no_modules')}</div>
                                         )}
                                 </div>
-                            </div>
+                            </FluidCard>
                         </div>
                     </div>
                 </main>

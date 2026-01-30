@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { GlassLayout } from '@/components/layout/GlassLayout';
 import { Navbar } from '@/components/layout/Navbar';
 import { AuthModal } from '@/components/auth/AuthModal';
+import { FluidButton, FluidCard } from '@/components/ui/FluidDesign';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Terminal, Gamepad2, Database, Zap, ArrowRight, Shield, Code } from 'lucide-react';
 import { useViewStore } from '@/store/viewStore';
@@ -123,21 +124,21 @@ function LandingPage() {
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-4 pt-4 w-full sm:w-auto">
-                            <button
+                            <FluidButton
                                 onClick={() => setIsAuthOpen(true)}
-                                className="group relative w-full sm:w-auto px-8 py-4 bg-liquid-primary text-black font-bold text-lg tracking-wider clip-path-slant hover:bg-white transition-all duration-300 shadow-[0_0_30px_rgba(0,243,255,0.4)] hover:shadow-[0_0_50px_rgba(0,243,255,0.6)] flex items-center justify-center"
+                                variant="primary"
+                                className="w-full sm:w-auto text-lg tracking-wider"
                             >
-                                <span className="relative z-10 flex items-center gap-2">
-                                    {t('hero.start_mission')} <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                                </span>
-                            </button>
+                                {t('hero.start_mission')} <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                            </FluidButton>
 
-                            <button
+                            <FluidButton
                                 onClick={() => setView('documentation')}
-                                className="w-full sm:w-auto px-8 py-4 bg-black/40 backdrop-blur-md border border-white/20 text-white font-bold text-lg tracking-wider clip-path-slant hover:bg-white/10 hover:border-white/50 transition-all duration-300 shadow-lg text-center"
+                                variant="glass"
+                                className="w-full sm:w-auto text-lg tracking-wider"
                             >
                                 {t('hero.view_docs')}
-                            </button>
+                            </FluidButton>
                         </div>
                     </motion.div>
 
@@ -238,7 +239,7 @@ public class LiquidSword extends Item {
 }
 
 const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) => (
-    <div className="glass-card p-8 group hover:-translate-y-2 transition-transform duration-300 border border-white/5 hover:border-liquid-primary/30 bg-white/5">
+    <FluidCard className="group">
         <div className="mb-6 p-4 bg-white/5 rounded-lg w-fit group-hover:bg-white/10 transition-colors">
             {icon}
         </div>
@@ -246,7 +247,7 @@ const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode, titl
         <p className="text-gray-400 leading-relaxed">
             {description}
         </p>
-    </div>
+    </FluidCard>
 )
 
 export default LandingPage
