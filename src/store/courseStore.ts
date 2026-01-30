@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { supabase } from '@/lib/supabase';
-import type { Course, Module } from '@/types';
+import type { Course } from '@/types';
 
 interface CourseState {
     courses: Course[];
