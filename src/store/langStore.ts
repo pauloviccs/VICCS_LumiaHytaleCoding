@@ -59,6 +59,14 @@ const translations: Record<Language, Record<string, string>> = {
         'dash.upcoming': 'Upcoming Modules',
         'dash.locked': 'Locked',
         'dash.no_modules': 'No additional modules detected.',
+
+        // Studio
+        'studio.run': 'RUN',
+        'studio.objectives': 'OBJECTIVES',
+        'studio.console': 'CONSOLE OUTPUT',
+        'studio.tip': 'TIP',
+        'studio.success': 'MISSION COMPLETE',
+        'studio.next': 'NEXT MISSION',
     },
     'pt-br': {
         // Landing Page
@@ -108,6 +116,14 @@ const translations: Record<Language, Record<string, string>> = {
         'dash.upcoming': 'Próximos Módulos',
         'dash.locked': 'Bloqueado',
         'dash.no_modules': 'Nenhum módulo adicional detectado.',
+
+        // Studio
+        'studio.run': 'EXECUTAR',
+        'studio.objectives': 'OBJETIVOS',
+        'studio.console': 'SAÍDA DO CONSOLE',
+        'studio.tip': 'DICA',
+        'studio.success': 'MISSÃO CUMPRIDA',
+        'studio.next': 'PRÓXIMA MISSÃO',
     }
 };
 

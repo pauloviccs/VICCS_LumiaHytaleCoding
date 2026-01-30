@@ -58,6 +58,8 @@ export type Database = {
                     validation_value: string | null
                     starter_code: string | null
                     lore: string | null
+                    tip_en: string | null
+                    tip_pt: string | null
                 }
                 Insert: {
                     content?: string | null

@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
 import ReactMarkdown from 'react-markdown';
-import { Play, ArrowLeft, Terminal as TerminalIcon, Info, X } from 'lucide-react';
+import { Play, ArrowLeft, Terminal as TerminalIcon, Info, X, Globe } from 'lucide-react';
 import { useViewStore } from '@/store/viewStore';
 import { useCourseStore } from '@/store/courseStore';
 import { useAuthStore } from '@/store/authStore';
+import { useLangStore } from '@/store/langStore';
 import { supabase } from '@/lib/supabase';
 import { SuccessModal } from '@/components/studio/SuccessModal';
 import type { Lesson } from '@/types';
@@ -13,6 +14,7 @@ export default function Studio() {
     const { setView, context } = useViewStore();
     const { courses, fetchLessons } = useCourseStore();
     const { user } = useAuthStore();
+    const { language, setLanguage, t } = useLangStore();
 
     // Find active module and lesson
     // TODO: Improve this lookup, maybe normalize state or use selectors
@@ -155,6 +157,14 @@ export default function Studio() {
 
                 <div className="flex items-center gap-2 md:gap-4">
                     <button
+                        onClick={() => setLanguage(language === 'en' ? 'pt-br' : 'en')}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-bold hover:bg-white/10 transition-colors uppercase tracking-wider text-white"
+                    >
+                        <Globe size={14} />
+                        {language === 'en' ? 'EN' : 'PT-BR'}
+                    </button>
+
+                    <button
                         onClick={() => setShowInstructions(!showInstructions)}
                         className="md:hidden p-2 text-gray-400 hover:text-white"
                     >
@@ -166,7 +176,7 @@ export default function Studio() {
                         className="flex items-center gap-2 px-3 md:px-4 py-1.5 bg-green-600 hover:bg-green-500 text-white font-bold rounded text-xs md:text-sm transition-colors disabled:opacity-50"
                     >
                         <Play size={14} fill="currentColor" />
-                        {isRunning ? '...' : 'RUN'}
+                        {isRunning ? '...' : t('studio.run')}
                     </button>
                 </div>
             </header>
@@ -195,7 +205,7 @@ export default function Studio() {
                         </div>
 
                         <div className="space-y-4 mb-8">
-                            <h3 className="font-bold text-sm text-gray-300 uppercase tracking-wider">Objectives</h3>
+                            <h3 className="font-bold text-sm text-gray-300 uppercase tracking-wider">{t('studio.objectives')}</h3>
                             <div className="flex items-start gap-3 p-3 rounded-lg bg-white/5 border border-white/5 text-sm">
                                 <div className="mt-0.5 shrink-0"><div className="w-4 h-4 rounded border border-gray-500" /></div>
                                 <span className="text-gray-300">Complete the exercise to earn {activeLesson?.xp_reward || 10} XP.</span>
@@ -203,7 +213,7 @@ export default function Studio() {
                         </div>
 
                         <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-300 text-sm">
-                            <strong>Tip:</strong> Keep an eye on system output.
+                            <strong>{t('studio.tip')}:</strong> {language === 'en' ? activeLesson?.tip_en : activeLesson?.tip_pt}
                         </div>
                     </div>
                 </div>
@@ -232,7 +242,7 @@ export default function Studio() {
                     <div className="h-48 md:h-48 border-t border-white/10 bg-black flex flex-col shrink-0">
                         <div className="h-8 flex items-center px-4 bg-white/5 border-b border-white/5 gap-2">
                             <TerminalIcon size={14} className="text-gray-500" />
-                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Console Output</span>
+                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t('studio.console')}</span>
                         </div>
                         <div className="flex-1 p-4 font-mono text-sm text-gray-300 overflow-y-auto space-y-1">
                             {output.map((line, i) => (
