@@ -58,14 +58,14 @@ function LandingPage() {
                         initial={{ opacity: 0, x: -50 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.8, ease: "easeOut" }}
-                        className="space-y-8"
+                        className="space-y-8 relative z-20"
                     >
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm text-sm font-mono text-liquid-primary">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm text-xs md:text-sm font-mono text-liquid-primary">
                             <span className="animate-pulse w-2 h-2 rounded-full bg-liquid-primary" />
                             {t('hero.system_online')}
                         </div>
 
-                        <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9]">
+                        <h1 className="text-5xl sm:text-6xl md:text-8xl font-black tracking-tighter leading-[0.9]">
                             {language === 'en' ? (
                                 <>
                                     CODE <br />
@@ -91,14 +91,14 @@ function LandingPage() {
                             )}
                         </h1>
 
-                        <p className="text-xl text-gray-300 max-w-lg leading-relaxed drop-shadow-md">
+                        <p className="text-lg md:text-xl text-gray-300 max-w-lg leading-relaxed drop-shadow-md">
                             {t('hero.subtitle')}
                         </p>
 
-                        <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                        <div className="flex flex-col sm:flex-row gap-4 pt-4 w-full sm:w-auto">
                             <button
                                 onClick={() => setIsAuthOpen(true)}
-                                className="group relative px-8 py-4 bg-liquid-primary text-black font-bold text-lg tracking-wider clip-path-slant hover:bg-white transition-all duration-300 shadow-[0_0_30px_rgba(0,243,255,0.4)] hover:shadow-[0_0_50px_rgba(0,243,255,0.6)]"
+                                className="group relative w-full sm:w-auto px-8 py-4 bg-liquid-primary text-black font-bold text-lg tracking-wider clip-path-slant hover:bg-white transition-all duration-300 shadow-[0_0_30px_rgba(0,243,255,0.4)] hover:shadow-[0_0_50px_rgba(0,243,255,0.6)] flex items-center justify-center"
                             >
                                 <span className="relative z-10 flex items-center gap-2">
                                     {t('hero.start_mission')} <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -107,7 +107,7 @@ function LandingPage() {
 
                             <button
                                 onClick={() => setView('documentation')}
-                                className="px-8 py-4 bg-black/40 backdrop-blur-md border border-white/20 text-white font-bold text-lg tracking-wider clip-path-slant hover:bg-white/10 hover:border-white/50 transition-all duration-300 shadow-lg"
+                                className="w-full sm:w-auto px-8 py-4 bg-black/40 backdrop-blur-md border border-white/20 text-white font-bold text-lg tracking-wider clip-path-slant hover:bg-white/10 hover:border-white/50 transition-all duration-300 shadow-lg text-center"
                             >
                                 {t('hero.view_docs')}
                             </button>
