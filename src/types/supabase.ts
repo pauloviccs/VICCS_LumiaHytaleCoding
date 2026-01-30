@@ -54,6 +54,10 @@ export type Database = {
                     title: string
                     type: string | null
                     xp_reward: number | null
+                    validation_type: string | null
+                    validation_value: string | null
+                    starter_code: string | null
+                    lore: string | null
                 }
                 Insert: {
                     content?: string | null
@@ -64,6 +68,10 @@ export type Database = {
                     title: string
                     type?: string | null
                     xp_reward?: number | null
+                    validation_type?: string | null
+                    validation_value?: string | null
+                    starter_code?: string | null
+                    lore?: string | null
                 }
                 Update: {
                     content?: string | null
@@ -74,6 +82,10 @@ export type Database = {
                     title?: string
                     type?: string | null
                     xp_reward?: number | null
+                    validation_type?: string | null
+                    validation_value?: string | null
+                    starter_code?: string | null
+                    lore?: string | null
                 }
                 Relationships: [
                     {

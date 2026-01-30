@@ -3,11 +3,14 @@ import Editor from '@monaco-editor/react';
 import { Play, ArrowLeft, Terminal as TerminalIcon, Info, X } from 'lucide-react';
 import { useViewStore } from '@/store/viewStore';
 import { useCourseStore } from '@/store/courseStore';
+import { useAuthStore } from '@/store/authStore';
+import { supabase } from '@/lib/supabase';
 import type { Lesson } from '@/types';
 
 export default function Studio() {
     const { setView, context } = useViewStore();
     const { courses, fetchLessons } = useCourseStore();
+    const { user } = useAuthStore();
 
     // Find active module and lesson
     // TODO: Improve this lookup, maybe normalize state or use selectors
@@ -16,6 +19,7 @@ export default function Studio() {
         .find(m => m.id === context?.moduleId);
 
     const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
+    const [code, setCode] = useState('');
     const [output, setOutput] = useState<string[]>(['> System initialized.', '> Ready for input...']);
     const [isRunning, setIsRunning] = useState(false);
     const [showInstructions, setShowInstructions] = useState(true);
@@ -35,19 +39,66 @@ export default function Studio() {
                 ? activeModule.lessons.find(l => l.id === context.lessonId)
                 : activeModule.lessons[0];
 
-            if (lesson) setActiveLesson(lesson);
+            if (lesson) {
+                setActiveLesson(lesson);
+                setCode(lesson.starter_code || '');
+                setOutput(['> System initialized.', '> Ready for input...', `> Loaded: ${lesson.title}`]);
+            }
         }
     }, [activeModule, context?.lessonId]);
 
-    const handleRun = () => {
+    const handleRun = async () => {
+        if (!activeLesson) return;
+
         setIsRunning(true);
         setOutput(prev => [...prev, '> Compiling...', '> Running Main.java...']);
 
-        setTimeout(() => {
-            // In the future this should run against a real backend or Piston API
-            setOutput(prev => [...prev, 'Hello World', '> Process finished with exit code 0.']);
-            setIsRunning(false);
-        }, 1500);
+        // Mock delay for "compilation"
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        let success = false;
+        const logs: string[] = [];
+
+        // Validation Logic
+        if (activeLesson.validation_type === 'regex' && activeLesson.validation_value) {
+            try {
+                const regex = new RegExp(activeLesson.validation_value);
+                if (regex.test(code)) {
+                    success = true;
+                    logs.push('> SYSTEM: Signal matches expected pattern.');
+                    logs.push('> SYSTEM: Connection established.');
+                    logs.push(`> SUCCESS: +${activeLesson.xp_reward} XP Gained!`);
+                } else {
+                    logs.push('> ERROR: Signal signature mismatch.');
+                    logs.push('> SYSTEM: Operation failed.');
+                }
+            } catch (e) {
+                logs.push('> SYSTEM ERROR: Invalid validation pattern.');
+            }
+        } else {
+            // Default fallback
+            logs.push('Hello World');
+            logs.push('> Process finished with exit code 0.');
+            success = true; // Auto-success for non-validated lessons? Or maybe manual check.
+        }
+
+        setOutput(prev => [...prev, ...logs]);
+        setIsRunning(false);
+
+        // Update Progress
+        if (success && user) {
+            try {
+                await supabase.from('user_progress').upsert({
+                    user_id: user.id,
+                    lesson_id: activeLesson.id,
+                    is_completed: true,
+                    completed_at: new Date().toISOString()
+                });
+                // TODO: Update local user stats (XP) via authStore or trigger fetch
+            } catch (err) {
+                console.error('Failed to save progress', err);
+            }
+        }
     };
 
     if (!activeModule) {
@@ -102,6 +153,13 @@ export default function Studio() {
                         </button>
 
                         <h1 className="text-2xl font-bold mb-4 mt-8 md:mt-0">{activeLesson?.title}</h1>
+
+                        {activeLesson?.lore && (
+                            <div className="mb-6 p-4 bg-liquid-accent/10 border-l-4 border-liquid-accent text-gray-300 italic text-sm">
+                                "{activeLesson.lore}"
+                            </div>
+                        )}
+
                         <div className="text-gray-400 mb-6 leading-relaxed text-sm md:text-base prose prose-invert max-w-none">
                             {/* Simple text rendering for now, could use MDX/Markdown later */}
                             {activeLesson?.content || 'No content available.'}
@@ -127,12 +185,8 @@ export default function Studio() {
                         <Editor
                             height="100%"
                             defaultLanguage="java"
-                            defaultValue={`public class Main {
-  public static void main(String[] args) {
-    // Write your code here
-    System.out.println("Hello World");
-  }
-}`}
+                            value={code}
+                            onChange={(value) => setCode(value || '')}
                             theme="vs-dark"
                             options={{
                                 minimap: { enabled: false },
