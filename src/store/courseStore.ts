@@ -1,20 +1,6 @@
 import { create } from 'zustand';
 import { supabase } from '@/lib/supabase';
-
-export interface Module {
-    id: string;
-    title: string;
-    description: string;
-    order_index: number;
-    is_locked: boolean;
-}
-
-export interface Course {
-    id: string;
-    title: string;
-    description: string;
-    modules: Module[];
-}
+import type { Course, Module } from '@/types';
 
 interface CourseState {
     courses: Course[];
@@ -38,22 +24,28 @@ export const useCourseStore = create<CourseState>((set) => ({
           modules (
             id,
             title,
-            description,
             order_index,
-            is_locked
+            created_at,
+            course_id
           )
         `)
                 .order('created_at', { ascending: true });
 
             if (error) throw error;
 
-            // Sort modules by order_index
+            // Sort modules by order_index and format
             const formattedData = data?.map(course => ({
                 ...course,
-                modules: course.modules.sort((a: Module, b: Module) => a.order_index - b.order_index)
+                modules: course.modules
+                    .sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
+                    .map(m => ({
+                        ...m,
+                        lessons: [], // Loaded separately or we could join them
+                        is_locked: false // Logic to be added based on progress
+                    }))
             }));
 
-            set({ courses: formattedData || [], loading: false });
+            set({ courses: formattedData as Course[] || [], loading: false });
         } catch (err: any) {
             console.error('Error fetching courses:', err);
             set({ error: err.message, loading: false });
