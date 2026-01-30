@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
+import ReactMarkdown from 'react-markdown';
 import { Play, ArrowLeft, Terminal as TerminalIcon, Info, X } from 'lucide-react';
 import { useViewStore } from '@/store/viewStore';
 import { useCourseStore } from '@/store/courseStore';
 import { useAuthStore } from '@/store/authStore';
 import { supabase } from '@/lib/supabase';
+import { SuccessModal } from '@/components/studio/SuccessModal';
 import type { Lesson } from '@/types';
 
 export default function Studio() {
@@ -23,6 +25,8 @@ export default function Studio() {
     const [output, setOutput] = useState<string[]>(['> System initialized.', '> Ready for input...']);
     const [isRunning, setIsRunning] = useState(false);
     const [showInstructions, setShowInstructions] = useState(true);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [xpGained, setXpGained] = useState(0);
 
     // Fetch lessons when module changes
     useEffect(() => {
@@ -85,19 +89,45 @@ export default function Studio() {
         setOutput(prev => [...prev, ...logs]);
         setIsRunning(false);
 
+        setOutput(prev => [...prev, ...logs]);
+        setIsRunning(false);
+
         // Update Progress
-        if (success && user) {
-            try {
-                await supabase.from('user_progress').upsert({
-                    user_id: user.id,
-                    lesson_id: activeLesson.id,
-                    is_completed: true,
-                    completed_at: new Date().toISOString()
-                });
-                // TODO: Update local user stats (XP) via authStore or trigger fetch
-            } catch (err) {
-                console.error('Failed to save progress', err);
+        if (success) {
+            setXpGained(activeLesson.xp_reward || 0);
+            setShowSuccessModal(true);
+
+            if (user) {
+                try {
+                    await supabase.from('user_progress').upsert({
+                        user_id: user.id,
+                        lesson_id: activeLesson.id,
+                        is_completed: true,
+                        completed_at: new Date().toISOString()
+                    });
+                    // TODO: Update local user stats (XP) via authStore or trigger fetch
+                } catch (err) {
+                    console.error('Failed to save progress', err);
+                }
             }
+        }
+    };
+
+    const handleNextLesson = () => {
+        setShowSuccessModal(false);
+        if (!activeModule || !activeLesson) return;
+
+        // Simple logic: Find next lesson in current module
+        // In real app, this should handle module transitions too
+        const currentIndex = activeModule.lessons?.findIndex(l => l.id === activeLesson.id) ?? -1;
+        const nextLesson = activeModule.lessons?.[currentIndex + 1];
+
+        if (nextLesson) {
+            setView('studio', { moduleId: activeModule.id, lessonId: nextLesson.id });
+        } else {
+            // End of module, maybe go back to dashboard or show completion screen
+            // For now, go to dashboard
+            setView('dashboard');
         }
     };
 
@@ -161,8 +191,7 @@ export default function Studio() {
                         )}
 
                         <div className="text-gray-400 mb-6 leading-relaxed text-sm md:text-base prose prose-invert max-w-none">
-                            {/* Simple text rendering for now, could use MDX/Markdown later */}
-                            {activeLesson?.content || 'No content available.'}
+                            <ReactMarkdown>{activeLesson?.content || 'No content available.'}</ReactMarkdown>
                         </div>
 
                         <div className="space-y-4 mb-8">
@@ -216,6 +245,14 @@ export default function Studio() {
                     </div>
                 </div>
             </div>
+
+            <SuccessModal
+                isOpen={showSuccessModal}
+                onClose={() => setShowSuccessModal(false)}
+                onNext={handleNextLesson}
+                xpGained={xpGained}
+                title={activeLesson?.title || 'Mission'}
+            />
         </div>
     );
 }
