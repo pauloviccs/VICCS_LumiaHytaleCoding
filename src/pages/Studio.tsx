@@ -126,11 +126,13 @@ export default function Studio() {
 
                     // 2. Update Profile Stats (XP & Streak)
                     // We fetch current profile first to ensure we have latest data
-                    const { data: currentProfile } = await supabase
+                    const { data: currentProfile, error: profileFetchError } = await supabase
                         .from('profiles')
                         .select('xp, streak, updated_at')
                         .eq('id', user.id)
                         .single();
+
+                    console.log('[Studio] Current Profile Fetched:', currentProfile, 'Error:', profileFetchError);
 
                     if (currentProfile) {
                         const newXp = (currentProfile.xp || 0) + (activeLesson.xp_reward || 0);
@@ -149,11 +151,21 @@ export default function Studio() {
 
                         const newStreak = isSameDay ? (currentProfile.streak || 0) : (currentProfile.streak || 0) + 1;
 
-                        await supabase.from('profiles').update({
+                        console.log('[Studio] Updating profile with:', { newXp, newStreak, userId: user.id });
+
+                        const { error: updateError } = await supabase.from('profiles').update({
                             xp: newXp,
                             streak: newStreak,
                             updated_at: new Date().toISOString()
                         }).eq('id', user.id);
+
+                        if (updateError) {
+                            console.error('[Studio] Profile update error:', updateError);
+                        } else {
+                            console.log('[Studio] Profile updated successfully!');
+                        }
+                    } else {
+                        console.warn('[Studio] No profile found! User might not have a profile record.');
                     }
 
                     // Refresh stores
