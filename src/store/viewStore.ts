@@ -2,12 +2,19 @@ import { create } from 'zustand';
 
 type View = 'dashboard' | 'studio' | 'documentation';
 
+interface ViewContext {
+    moduleId?: string;
+    lessonId?: string;
+}
+
 interface ViewState {
     currentView: View;
-    setView: (view: View) => void;
+    context: ViewContext | null;
+    setView: (view: View, context?: ViewContext) => void;
 }
 
 export const useViewStore = create<ViewState>((set) => ({
     currentView: 'dashboard',
-    setView: (view) => set({ currentView: view }),
+    context: null,
+    setView: (view, context) => set({ currentView: view, context: context || null }),
 }));

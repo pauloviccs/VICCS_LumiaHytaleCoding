@@ -163,7 +163,13 @@ export default function Dashboard() {
                                         {activeCourse?.description || t('dash.syncing')}
                                     </p>
                                     <button
-                                        onClick={() => setView('studio')}
+                                        onClick={() => {
+                                            if (activeCourse?.modules?.[0]?.id) {
+                                                setView('studio', { moduleId: activeCourse.modules[0].id });
+                                            } else {
+                                                setView('studio');
+                                            }
+                                        }}
                                         className="w-full md:w-auto px-6 py-3 bg-white text-black font-bold rounded-lg flex items-center justify-center gap-2 hover:bg-gray-200 transition-colors shadow-lg shadow-white/10"
                                     >
                                         <Play size={18} fill="currentColor" /> {t('dash.resume')}

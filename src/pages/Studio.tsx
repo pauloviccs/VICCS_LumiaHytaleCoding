@@ -1,23 +1,58 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
 import { Play, ArrowLeft, Terminal as TerminalIcon, Info, X } from 'lucide-react';
 import { useViewStore } from '@/store/viewStore';
+import { useCourseStore } from '@/store/courseStore';
+import type { Lesson } from '@/types';
 
 export default function Studio() {
-    const { setView } = useViewStore();
+    const { setView, context } = useViewStore();
+    const { courses, fetchLessons } = useCourseStore();
+
+    // Find active module and lesson
+    // TODO: Improve this lookup, maybe normalize state or use selectors
+    const activeModule = courses
+        .flatMap(c => c.modules)
+        .find(m => m.id === context?.moduleId);
+
+    const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
     const [output, setOutput] = useState<string[]>(['> System initialized.', '> Ready for input...']);
     const [isRunning, setIsRunning] = useState(false);
     const [showInstructions, setShowInstructions] = useState(true);
+
+    // Fetch lessons when module changes
+    useEffect(() => {
+        if (context?.moduleId) {
+            fetchLessons(context.moduleId);
+        }
+    }, [context?.moduleId, fetchLessons]);
+
+    // Set active lesson when data is available
+    useEffect(() => {
+        if (activeModule?.lessons && activeModule.lessons.length > 0) {
+            // Default to first lesson if no lessonId is provided
+            const lesson = context?.lessonId
+                ? activeModule.lessons.find(l => l.id === context.lessonId)
+                : activeModule.lessons[0];
+
+            if (lesson) setActiveLesson(lesson);
+        }
+    }, [activeModule, context?.lessonId]);
 
     const handleRun = () => {
         setIsRunning(true);
         setOutput(prev => [...prev, '> Compiling...', '> Running Main.java...']);
 
         setTimeout(() => {
+            // In the future this should run against a real backend or Piston API
             setOutput(prev => [...prev, 'Hello World', '> Process finished with exit code 0.']);
             setIsRunning(false);
         }, 1500);
     };
+
+    if (!activeModule) {
+        return <div className="h-screen flex items-center justify-center text-white">Loading module...</div>;
+    }
 
     return (
         <div className="h-screen bg-[#0a0a0a] flex flex-col text-white overflow-hidden font-sans">
@@ -31,9 +66,9 @@ export default function Studio() {
                         <ArrowLeft size={20} />
                     </button>
                     <div className="flex items-center gap-2 overflow-hidden">
-                        <span className="text-liquid-primary font-bold whitespace-nowrap">MODULE 1.1</span>
+                        <span className="text-liquid-primary font-bold whitespace-nowrap uppercase">{activeModule.title}</span>
                         <span className="text-gray-500 hidden sm:inline">/</span>
-                        <span className="text-sm font-medium hidden sm:inline truncate">Hello World</span>
+                        <span className="text-sm font-medium hidden sm:inline truncate">{activeLesson?.title || 'Loading...'}</span>
                     </div>
                 </div>
 
@@ -56,8 +91,7 @@ export default function Studio() {
             </header>
 
             <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
-                {/* Left Panel: Content - Hidden on mobile unless toggled (or maybe better to keep it accessible via tabs, but for now stack or toggle) */}
-                {/* Approach: On mobile, it's a slide-over or a collapsible section. Let's make it responsive: W-full on mobile, hidden if we want focus mode. */}
+                {/* Left Panel: Content */}
                 <div className={`${showInstructions ? 'flex' : 'hidden'} md:flex w-full md:w-[400px] border-b md:border-b-0 md:border-r border-white/10 flex-col bg-black/20 absolute md:relative z-20 inset-0 md:inset-auto bg-black/95 md:bg-transparent`}>
                     <div className="p-4 md:p-8 overflow-y-auto relative h-full">
                         <button
@@ -67,22 +101,22 @@ export default function Studio() {
                             <X size={24} />
                         </button>
 
-                        <h1 className="text-2xl font-bold mb-4 mt-8 md:mt-0">Your First Spell</h1>
-                        <p className="text-gray-400 mb-6 leading-relaxed text-sm md:text-base">
-                            In the world of Hytale modding, everything starts with printing to the console.
-                            This verifies that your mod has loaded correctly.
-                        </p>
+                        <h1 className="text-2xl font-bold mb-4 mt-8 md:mt-0">{activeLesson?.title}</h1>
+                        <div className="text-gray-400 mb-6 leading-relaxed text-sm md:text-base prose prose-invert max-w-none">
+                            {/* Simple text rendering for now, could use MDX/Markdown later */}
+                            {activeLesson?.content || 'No content available.'}
+                        </div>
 
                         <div className="space-y-4 mb-8">
                             <h3 className="font-bold text-sm text-gray-300 uppercase tracking-wider">Objectives</h3>
                             <div className="flex items-start gap-3 p-3 rounded-lg bg-white/5 border border-white/5 text-sm">
                                 <div className="mt-0.5 shrink-0"><div className="w-4 h-4 rounded border border-gray-500" /></div>
-                                <span className="text-gray-300">Using `System.out.println`, print "Hello World" to the console.</span>
+                                <span className="text-gray-300">Complete the exercise to earn {activeLesson?.xp_reward || 10} XP.</span>
                             </div>
                         </div>
 
                         <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-300 text-sm">
-                            <strong>Tip:</strong> Java is case-sensitive. `System` must start with a capital S.
+                            <strong>Tip:</strong> Keep an eye on system output.
                         </div>
                     </div>
                 </div>
@@ -96,7 +130,7 @@ export default function Studio() {
                             defaultValue={`public class Main {
   public static void main(String[] args) {
     // Write your code here
-    
+    System.out.println("Hello World");
   }
 }`}
                             theme="vs-dark"

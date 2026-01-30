@@ -7,6 +7,7 @@ interface CourseState {
     loading: boolean;
     error: string | null;
     fetchCourses: () => Promise<void>;
+    fetchLessons: (moduleId: string) => Promise<void>;
 }
 
 export const useCourseStore = create<CourseState>((set) => ({
@@ -51,4 +52,31 @@ export const useCourseStore = create<CourseState>((set) => ({
             set({ error: err.message, loading: false });
         }
     },
+
+    fetchLessons: async (moduleId: string) => {
+        // Find if we already have lessons for this module to avoid refetching?
+        // For now, always fetch to be safe or just update the specific module in state
+        try {
+            const { data, error } = await supabase
+                .from('lessons')
+                .select('*')
+                .eq('module_id', moduleId)
+                .order('order_index', { ascending: true });
+
+            if (error) throw error;
+
+            set(state => ({
+                courses: state.courses.map(course => ({
+                    ...course,
+                    modules: course.modules.map(module =>
+                        module.id === moduleId
+                            ? { ...module, lessons: data as any[] }
+                            : module
+                    )
+                }))
+            }));
+        } catch (err: any) {
+            console.error('Error fetching lessons:', err);
+        }
+    }
 }));
