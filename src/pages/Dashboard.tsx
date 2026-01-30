@@ -27,11 +27,7 @@ export default function Dashboard() {
     const { setView } = useViewStore();
     const {
         courses,
-        fetchCourses,
-        fetchUserProgress,
-        getRecentActivity,
-        getCourseProgress,
-        isModuleLocked
+        getLastActiveCourseId
     } = useCourseStore();
     const { t, language, setLanguage } = useLangStore();
     const [activeTab, setActiveTab] = useState('overview');
@@ -44,7 +40,9 @@ export default function Dashboard() {
         }
     }, [fetchCourses, fetchUserProgress, user]);
 
-    const activeCourse = courses[0]; // For now, just show the first course
+    // Dynamic Active Course
+    const lastActiveDetails = getLastActiveCourseId();
+    const activeCourse = courses.find(c => c.id === lastActiveDetails) || courses[0];
 
     const SidebarContent = () => (
         <>

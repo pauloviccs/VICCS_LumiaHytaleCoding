@@ -114,16 +114,52 @@ export default function Studio() {
 
             if (user) {
                 try {
-                    await supabase.from('user_progress').upsert({
+                    // 1. Record Progress
+                    const { error: progressError } = await supabase.from('user_progress').upsert({
                         user_id: user.id,
                         lesson_id: activeLesson.id,
                         is_completed: true,
                         completed_at: new Date().toISOString()
                     });
 
-                    // Refresh profile to get updated XP
+                    if (progressError) throw progressError;
+
+                    // 2. Update Profile Stats (XP & Streak)
+                    // We fetch current profile first to ensure we have latest data
+                    const { data: currentProfile } = await supabase
+                        .from('profiles')
+                        .select('xp, streak, updated_at')
+                        .eq('id', user.id)
+                        .single();
+
+                    if (currentProfile) {
+                        const newXp = (currentProfile.xp || 0) + (activeLesson.xp_reward || 0);
+
+                        // Simple Streak Logic: 
+                        // If updated_at is NOT today, increment streak.
+                        // (This is basic; usually you'd check if it was yesterday to maintain, else reset)
+                        // For this prototype, we just increment if it's a new day or simpler: just increment.
+                        // Let's do a "Same Day" check to avoid spamming streak on same day.
+
+                        const lastUpdate = currentProfile.updated_at ? new Date(currentProfile.updated_at) : new Date(0);
+                        const today = new Date();
+                        const isSameDay = lastUpdate.getDate() === today.getDate() &&
+                            lastUpdate.getMonth() === today.getMonth() &&
+                            lastUpdate.getFullYear() === today.getFullYear();
+
+                        const newStreak = isSameDay ? (currentProfile.streak || 0) : (currentProfile.streak || 0) + 1;
+
+                        await supabase.from('profiles').update({
+                            xp: newXp,
+                            streak: newStreak,
+                            updated_at: new Date().toISOString()
+                        }).eq('id', user.id);
+                    }
+
+                    // Refresh stores
                     useAuthStore.getState().refreshProfile();
-                    // TODO: Update local user stats (XP) via authStore or trigger fetch
+                    useCourseStore.getState().fetchUserProgress(user.id);
+
                 } catch (err) {
                     console.error('Failed to save progress', err);
                 }

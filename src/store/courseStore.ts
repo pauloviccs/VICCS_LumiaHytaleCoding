@@ -27,6 +27,7 @@ interface CourseState {
     getCourseProgress: (courseId: string) => number;
     isModuleLocked: (moduleId: string) => boolean;
     getNextLesson: (courseId: string) => string | undefined; // Returns ID of next playable lesson
+    getLastActiveCourseId: () => string | undefined;
 }
 
 export const useCourseStore = create<CourseState>((set, get) => ({
@@ -132,29 +133,50 @@ export const useCourseStore = create<CourseState>((set, get) => ({
         return userProgress.slice(0, limit);
     },
 
+    getLastActiveCourseId: () => {
+        const { userProgress, courses } = get();
+        if (userProgress.length > 0) {
+            // progress is ordered by completed_at desc in fetchUserProgress
+            const lastLesson = userProgress[0];
+            // @ts-ignore - joins are tricky to type perfectly without generated types extension
+            const courseId = lastLesson.lessons?.modules?.course_id;
+            if (courseId) return courseId;
+        }
+        return courses[0]?.id;
+    },
+
     getCourseProgress: (courseId: string) => {
-        // This is an approximation since we don't have total lessons count easily available 
-        // without fetching all lessons. For now, we'll return a calculated value if we have the data,
-        // or a placeholder if we haven't loaded everything.
-        // Ideally, specific counts should be stored on the course or module record, OR we fetch all lessons IDs.
+        const { userProgress, courses } = get();
 
-        // For this prototype, we will check how many unique lessons for this course are in userProgress.
-        // And compare against a hardcoded total or just return the count of completed lessons.
-        // Improving logic: We'll count completed lessons for this courseId.
+        // Find the course to get total modules/lessons (if we had that data)
+        // For now, we'll assume a fixed number or try to count from loaded data
+        const course = courses.find(c => c.id === courseId);
+        if (!course) return 0;
 
-        const { userProgress } = get();
-        // userProgress -> lessons -> modules -> course_id
-
-        const completedForCourse = userProgress.filter(p =>
-            (p.lessons as any)?.modules?.course_id === courseId
+        // Count unique completed lessons for this course
+        const completedLessonIds = new Set(
+            userProgress
+                .filter(p => (p.lessons as any)?.modules?.course_id === courseId)
+                .map(p => p.lesson_id)
         );
 
-        // Mocking total lessons for now as 10 per course to give a %
-        // In a real app, 'courses' table would have 'total_lessons' field.
-        const totalEstimated = 10;
-        const pct = Math.min(100, Math.round((completedForCourse.length / totalEstimated) * 100));
+        // Estimate total lessons. 
+        // If we have course data loaded, we can count available lessons in modules
+        let totalLessons = 0;
+        course.modules.forEach(m => {
+            if (m.lessons) {
+                totalLessons += m.lessons.length;
+            } else {
+                // Fallback if lessons aren't loaded for this module yet
+                // We assume 5 lessons per module as a placeholder if not loaded
+                totalLessons += 5;
+            }
+        });
 
-        return pct;
+        if (totalLessons === 0) return 0;
+
+        const pct = Math.round((completedLessonIds.size / totalLessons) * 100);
+        return Math.min(100, pct);
     },
 
     isModuleLocked: (moduleId: string) => {
