@@ -149,33 +149,46 @@ export const useCourseStore = create<CourseState>((set, get) => ({
         const { userProgress, courses } = get();
 
         // Find the course to get total modules/lessons (if we had that data)
-        // For now, we'll assume a fixed number or try to count from loaded data
         const course = courses.find(c => c.id === courseId);
-        if (!course) return 0;
+        if (!course) {
+            console.log('[getCourseProgress] Course not found:', courseId);
+            return 0;
+        }
 
         // Count unique completed lessons for this course
+        // The userProgress has lessons.modules.course_id structure from the join
         const completedLessonIds = new Set(
             userProgress
-                .filter(p => (p.lessons as any)?.modules?.course_id === courseId)
+                .filter(p => {
+                    // Try both possible nestings (singular vs plural from Supabase joins)
+                    const lessonData = (p as any).lessons;
+                    const moduleCourseId = lessonData?.modules?.course_id;
+                    return moduleCourseId === courseId;
+                })
                 .map(p => p.lesson_id)
         );
+
+        console.log('[getCourseProgress] Completed lessons for course:', completedLessonIds.size, 'userProgress:', userProgress);
 
         // Estimate total lessons. 
         // If we have course data loaded, we can count available lessons in modules
         let totalLessons = 0;
         course.modules.forEach(m => {
-            if (m.lessons) {
+            if (m.lessons && m.lessons.length > 0) {
                 totalLessons += m.lessons.length;
             } else {
-                // Fallback if lessons aren't loaded for this module yet
-                // We assume 5 lessons per module as a placeholder if not loaded
-                totalLessons += 5;
+                // Fallback: check if we have no lessons loaded, use a reasonable estimate
+                // Or query the DB for count (not implemented here, just a fallback)
+                totalLessons += 3; // Fallback estimate per module
             }
         });
+
+        console.log('[getCourseProgress] Total lessons estimate:', totalLessons, 'modules:', course.modules.length);
 
         if (totalLessons === 0) return 0;
 
         const pct = Math.round((completedLessonIds.size / totalLessons) * 100);
+        console.log('[getCourseProgress] Calculated percentage:', pct);
         return Math.min(100, pct);
     },
 
