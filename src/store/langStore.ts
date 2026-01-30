@@ -67,6 +67,13 @@ const translations: Record<Language, Record<string, string>> = {
         'studio.tip': 'TIP',
         'studio.success': 'MISSION COMPLETE',
         'studio.next': 'NEXT MISSION',
+        'studio.loading': 'Loading execution environment...',
+        'studio.compiling': 'Compiling...',
+        'studio.running': 'Running Main.java...',
+        'studio.complete_xp': 'Complete the exercise to earn {xp} XP.',
+        'studio.success_msg': 'Signal matches expected pattern.',
+        'studio.fail_msg': 'Signal signature mismatch.',
+        'studio.error_msg': 'Invalid validation pattern.',
     },
     'pt-br': {
         // Landing Page
@@ -124,6 +131,13 @@ const translations: Record<Language, Record<string, string>> = {
         'studio.tip': 'DICA',
         'studio.success': 'MISSÃO CUMPRIDA',
         'studio.next': 'PRÓXIMA MISSÃO',
+        'studio.loading': 'Carregando ambiente de execução...',
+        'studio.compiling': 'Compilando...',
+        'studio.running': 'Executando Main.java...',
+        'studio.complete_xp': 'Complete o exercício para ganhar {xp} XP.',
+        'studio.success_msg': 'Sinal corresponde ao padrão esperado.',
+        'studio.fail_msg': 'Assinatura do sinal incorreta.',
+        'studio.error_msg': 'Padrão de validação inválido.',
     }
 };
 

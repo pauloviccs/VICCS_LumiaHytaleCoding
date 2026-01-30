@@ -29,6 +29,18 @@ export default function Studio() {
     const [showInstructions, setShowInstructions] = useState(true);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [xpGained, setXpGained] = useState(0);
+    const [isTipRevealed, setIsTipRevealed] = useState(false);
+
+    // Dynamic Content based on Language
+    const lessonTitle = language === 'en' ? activeLesson?.title : (activeLesson?.title_pt || activeLesson?.title);
+    const lessonContent = language === 'en' ? activeLesson?.content : (activeLesson?.content_pt || activeLesson?.content);
+    const lessonLore = language === 'en' ? activeLesson?.lore : (activeLesson?.lore_pt || activeLesson?.lore);
+    const lessonTip = language === 'en' ? activeLesson?.tip_en : activeLesson?.tip_pt;
+
+    // Reset tip reveal on lesson change
+    useEffect(() => {
+        setIsTipRevealed(false);
+    }, [activeLesson?.id]);
 
     // Fetch lessons when module changes
     useEffect(() => {
@@ -151,7 +163,7 @@ export default function Studio() {
                     <div className="flex items-center gap-2 overflow-hidden">
                         <span className="text-liquid-primary font-bold whitespace-nowrap uppercase">{activeModule.title}</span>
                         <span className="text-gray-500 hidden sm:inline">/</span>
-                        <span className="text-sm font-medium hidden sm:inline truncate">{activeLesson?.title || 'Loading...'}</span>
+                        <span className="text-sm font-medium hidden sm:inline truncate">{lessonTitle || 'Loading...'}</span>
                     </div>
                 </div>
 
@@ -176,7 +188,7 @@ export default function Studio() {
                         className="flex items-center gap-2 px-3 md:px-4 py-1.5 bg-green-600 hover:bg-green-500 text-white font-bold rounded text-xs md:text-sm transition-colors disabled:opacity-50"
                     >
                         <Play size={14} fill="currentColor" />
-                        {isRunning ? '...' : t('studio.run')}
+                        {isRunning ? t('studio.compiling') : t('studio.run')}
                     </button>
                 </div>
             </header>
@@ -192,28 +204,33 @@ export default function Studio() {
                             <X size={24} />
                         </button>
 
-                        <h1 className="text-2xl font-bold mb-4 mt-8 md:mt-0">{activeLesson?.title}</h1>
+                        <h1 className="text-2xl font-bold mb-4 mt-8 md:mt-0">{lessonTitle}</h1>
 
                         {activeLesson?.lore && (
                             <div className="mb-6 p-4 bg-liquid-accent/10 border-l-4 border-liquid-accent text-gray-300 italic text-sm">
-                                "{activeLesson.lore}"
+                                "{lessonLore}"
                             </div>
                         )}
 
                         <div className="text-gray-400 mb-6 leading-relaxed text-sm md:text-base prose prose-invert max-w-none">
-                            <ReactMarkdown>{activeLesson?.content || 'No content available.'}</ReactMarkdown>
+                            <ReactMarkdown>{lessonContent || 'No content available.'}</ReactMarkdown>
                         </div>
 
                         <div className="space-y-4 mb-8">
                             <h3 className="font-bold text-sm text-gray-300 uppercase tracking-wider">{t('studio.objectives')}</h3>
                             <div className="flex items-start gap-3 p-3 rounded-lg bg-white/5 border border-white/5 text-sm">
                                 <div className="mt-0.5 shrink-0"><div className="w-4 h-4 rounded border border-gray-500" /></div>
-                                <span className="text-gray-300">Complete the exercise to earn {activeLesson?.xp_reward || 10} XP.</span>
+                                <span className="text-gray-300">
+                                    {t('studio.complete_xp').replace('{xp}', String(activeLesson?.xp_reward || 10))}
+                                </span>
                             </div>
                         </div>
 
-                        <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-300 text-sm">
-                            <strong>{t('studio.tip')}:</strong> {language === 'en' ? activeLesson?.tip_en : activeLesson?.tip_pt}
+                        <div
+                            className={`p-4 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-300 text-sm transition-all duration-300 cursor-pointer ${isTipRevealed ? 'filter-none' : 'blur-sm hover:blur-0'}`}
+                            onClick={() => setIsTipRevealed(!isTipRevealed)}
+                        >
+                            <strong>{t('studio.tip')}:</strong> {lessonTip || '...'}
                         </div>
                     </div>
                 </div>
@@ -261,7 +278,7 @@ export default function Studio() {
                 onClose={() => setShowSuccessModal(false)}
                 onNext={handleNextLesson}
                 xpGained={xpGained}
-                title={activeLesson?.title || 'Mission'}
+                title={lessonTitle || 'Mission'}
             />
         </div>
     );
