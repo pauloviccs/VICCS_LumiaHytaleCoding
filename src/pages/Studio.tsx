@@ -119,6 +119,9 @@ export default function Studio() {
                         is_completed: true,
                         completed_at: new Date().toISOString()
                     });
+
+                    // Refresh profile to get updated XP
+                    useAuthStore.getState().refreshProfile();
                     // TODO: Update local user stats (XP) via authStore or trigger fetch
                 } catch (err) {
                     console.error('Failed to save progress', err);

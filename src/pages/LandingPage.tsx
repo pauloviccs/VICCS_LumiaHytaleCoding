@@ -1,16 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { GlassLayout } from '@/components/layout/GlassLayout';
 import { Navbar } from '@/components/layout/Navbar';
 import { AuthModal } from '@/components/auth/AuthModal';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Terminal, Gamepad2, Database, Zap, ArrowRight, Shield, Code } from 'lucide-react';
 import { useViewStore } from '@/store/viewStore';
 import { useLangStore } from '@/store/langStore';
+
+const backgrounds = [
+    '/assets/backgrounds/background_7.jpg',
+    '/assets/backgrounds/background_8.jpg',
+    '/assets/backgrounds/background_9.jpg'
+];
 
 function LandingPage() {
     const [isAuthOpen, setIsAuthOpen] = useState(false);
     const { setView } = useViewStore();
     const { t, language } = useLangStore();
+    const [currentBgIndex, setCurrentBgIndex] = useState(0);
+
+    // Background Cycle Effect
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentBgIndex((prev) => (prev + 1) % backgrounds.length);
+        }, 8000); // Faster cycle for Hero (8s)
+        return () => clearInterval(timer);
+    }, []);
 
     // Mouse Parallax Logic
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -36,19 +51,31 @@ function LandingPage() {
             >
                 {/* Mouse Tracking Background */}
                 <motion.div
-                    className="absolute inset-0 z-0"
+                    className="absolute inset-0 z-0 overflow-hidden"
                     animate={{
                         x: mousePosition.x * -1,
                         y: mousePosition.y * -1,
-                        scale: 1.05 // Slight zoom to prevent edge clipping
+                        scale: 1.1 // Increased scale for safe parallax edges
                     }}
                     transition={{ type: 'tween', ease: 'linear', duration: 0.2 }}
                 >
-                    <div
-                        className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-screen pointer-events-none"
-                        style={{ backgroundImage: 'url(/assets/background_9.jpg)' }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black pointer-events-none" />
+                    <AnimatePresence mode="popLayout">
+                        <motion.div
+                            key={currentBgIndex}
+                            initial={{ opacity: 0, scale: 1.1 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 3, ease: "easeInOut" }}
+                            className="absolute inset-0 w-full h-full"
+                        >
+                            <img
+                                src={backgrounds[currentBgIndex]}
+                                alt="Hero Background"
+                                className="w-full h-full object-cover opacity-50 filter blur-lg mix-blend-screen"
+                            />
+                        </motion.div>
+                    </AnimatePresence>
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/60 to-black z-10 pointer-events-none" />
                 </motion.div>
 
                 <div className="container mx-auto px-6 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">

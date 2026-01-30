@@ -10,9 +10,10 @@ interface AuthState {
     loading: boolean;
     initialize: () => Promise<void>;
     signOut: () => Promise<void>;
+    refreshProfile: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
     user: null,
     session: null,
     profile: null,
@@ -59,5 +60,17 @@ export const useAuthStore = create<AuthState>((set) => ({
     signOut: async () => {
         await supabase.auth.signOut();
         set({ session: null, user: null, profile: null });
+    },
+
+    refreshProfile: async () => {
+        const { session } = get();
+        if (session?.user) {
+            const { data } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', session.user.id)
+                .single();
+            set({ profile: data });
+        }
     },
 }));
