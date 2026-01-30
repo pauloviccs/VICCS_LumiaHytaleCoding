@@ -114,15 +114,24 @@ export default function Studio() {
 
             if (user) {
                 try {
-                    // 1. Record Progress
-                    const { error: progressError } = await supabase.from('user_progress').upsert({
-                        user_id: user.id,
-                        lesson_id: activeLesson.id,
-                        is_completed: true,
-                        completed_at: new Date().toISOString()
-                    });
+                    // 1. Record Progress (with proper conflict handling)
+                    const { error: progressError } = await supabase.from('user_progress').upsert(
+                        {
+                            user_id: user.id,
+                            lesson_id: activeLesson.id,
+                            is_completed: true,
+                            completed_at: new Date().toISOString()
+                        },
+                        {
+                            onConflict: 'user_id, lesson_id',
+                            ignoreDuplicates: false // Update on conflict
+                        }
+                    );
 
-                    if (progressError) throw progressError;
+                    if (progressError) {
+                        console.error('[Studio] Progress upsert error:', progressError);
+                        throw progressError;
+                    }
 
                     // 2. Update Profile Stats (XP & Streak)
                     // We fetch current profile first to ensure we have latest data
