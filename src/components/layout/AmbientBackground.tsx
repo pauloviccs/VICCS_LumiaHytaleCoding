@@ -35,7 +35,7 @@ export function AmbientBackground() {
                     <img
                         src={backgrounds[index]}
                         alt="Ambient Background"
-                        className="w-full h-full object-cover opacity-60 filter blur-xl scale-110"
+                        className="w-full h-full object-cover opacity-60 filter blur-[12px] scale-110"
                     />
                 </motion.div>
             </AnimatePresence>
