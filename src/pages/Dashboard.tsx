@@ -28,11 +28,13 @@ export default function Dashboard() {
     const {
         courses,
         fetchCourses,
+        fetchLessons,
         fetchUserProgress,
         getRecentActivity,
         getCourseProgress,
         isModuleLocked,
-        getLastActiveCourseId
+        getLastActiveCourseId,
+        getNextLesson
     } = useCourseStore();
     const { t, language, setLanguage } = useLangStore();
     const [activeTab, setActiveTab] = useState('overview');
@@ -44,6 +46,19 @@ export default function Dashboard() {
             fetchUserProgress(user.id);
         }
     }, [fetchCourses, fetchUserProgress, user]);
+
+    // Fetch lessons for all modules when courses are loaded (for progress calculation)
+    useEffect(() => {
+        if (courses.length > 0) {
+            courses.forEach(course => {
+                course.modules.forEach(module => {
+                    if (!module.lessons || module.lessons.length === 0) {
+                        fetchLessons(module.id);
+                    }
+                });
+            });
+        }
+    }, [courses, fetchLessons]);
 
     // Dynamic Active Course
     const lastActiveDetails = getLastActiveCourseId();
@@ -178,7 +193,12 @@ export default function Dashboard() {
                                     </p>
                                     <FluidButton
                                         onClick={() => {
-                                            if (activeCourse?.modules?.[0]?.id) {
+                                            // Use intelligent resume: find next uncompleted lesson
+                                            const nextLesson = activeCourse ? getNextLesson(activeCourse.id) : undefined;
+                                            if (nextLesson) {
+                                                setView('studio', { moduleId: nextLesson.moduleId, lessonId: nextLesson.lessonId });
+                                            } else if (activeCourse?.modules?.[0]?.id) {
+                                                // Fallback to first module if no next lesson found
                                                 setView('studio', { moduleId: activeCourse.modules[0].id });
                                             } else {
                                                 setView('studio');

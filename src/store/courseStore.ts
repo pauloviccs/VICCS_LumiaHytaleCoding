@@ -26,7 +26,7 @@ interface CourseState {
     getRecentActivity: (limit?: number) => EnrichedProgress[];
     getCourseProgress: (courseId: string) => number;
     isModuleLocked: (moduleId: string) => boolean;
-    getNextLesson: (courseId: string) => string | undefined; // Returns ID of next playable lesson
+    getNextLesson: (courseId: string) => { moduleId: string; lessonId: string } | undefined;
     getLastActiveCourseId: () => string | undefined;
 }
 
@@ -232,10 +232,35 @@ export const useCourseStore = create<CourseState>((set, get) => ({
         return !hasProgressInPrev;
     },
 
-    getNextLesson: (_courseId: string) => {
-        // Intelligent Resume: Find the first uncompleted lesson.
-        // Requires all lessons to be known.
-        // If not loaded, we fallback to just opening the studio.
+    getNextLesson: (courseId: string) => {
+        const { userProgress, courses } = get();
+
+        // Find the course
+        const course = courses.find(c => c.id === courseId);
+        if (!course) return undefined;
+
+        // Get all completed lesson IDs for this user
+        const completedLessonIds = new Set(userProgress.map(p => p.lesson_id));
+
+        // Iterate through modules in order, then lessons in order to find the first uncompleted
+        for (const module of course.modules) {
+            if (!module.lessons || module.lessons.length === 0) continue;
+
+            for (const lesson of module.lessons) {
+                if (!completedLessonIds.has(lesson.id)) {
+                    // Found an uncompleted lesson
+                    console.log('[getNextLesson] Found next lesson:', lesson.title, 'in module:', module.id);
+                    return { moduleId: module.id, lessonId: lesson.id };
+                }
+            }
+        }
+
+        // All lessons completed? Return last lesson of last module
+        const lastModule = course.modules[course.modules.length - 1];
+        if (lastModule?.lessons?.length) {
+            return { moduleId: lastModule.id, lessonId: lastModule.lessons[lastModule.lessons.length - 1].id };
+        }
+
         return undefined;
     }
 }));
