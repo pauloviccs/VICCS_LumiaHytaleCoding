@@ -19,7 +19,6 @@ import {
     Globe,
     Menu,
     X,
-    Trash2,
     AlertTriangle,
     User,
     Shield,
@@ -335,7 +334,15 @@ export default function Dashboard() {
                         {/* Header */}
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
-                                <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">{activeTab === 'settings' ? (language === 'en' ? 'System Settings' : 'Configurações do Sistema') : t('dash.command_center')}</h1>
+                                <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+                                    {activeTab === 'settings'
+                                        ? (language === 'en' ? 'System Settings' : 'Configurações do Sistema')
+                                        : activeTab === 'projects'
+                                            ? (language === 'en' ? 'Project Portfolio' : 'Portfólio de Projetos')
+                                            : activeTab === 'docs'
+                                                ? (language === 'en' ? 'Knowledge Base' : 'Base de Conhecimento')
+                                                : t('dash.command_center')}
+                                </h1>
                                 <p className="text-gray-400 text-sm md:text-base">{t('dash.welcome')}</p>
                             </div>
                             <div className="flex gap-4 items-center self-end md:self-auto">
@@ -482,6 +489,32 @@ export default function Dashboard() {
                         )}
 
                         {activeTab === 'settings' && <SettingsView />}
+
+                        {(activeTab === 'projects' || activeTab === 'docs') && (
+                            <div className="flex flex-col items-center justify-center py-20 text-center space-y-6 animate-in fade-in zoom-in duration-500">
+                                <div className="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center border border-white/10 relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-liquid-primary/20 blur-xl animate-pulse" />
+                                    <Terminal size={40} className="text-gray-400 relative z-10" />
+                                </div>
+                                <div className="space-y-2 max-w-md mx-auto">
+                                    <h2 className="text-2xl font-bold text-white">
+                                        {language === 'en' ? 'Sector Under Construction' : 'Setor em Construção'}
+                                    </h2>
+                                    <p className="text-gray-400">
+                                        {language === 'en'
+                                            ? 'This module is currently being terraformed by the architecture team. Check back later.'
+                                            : 'Este módulo está sendo terraformado pela equipe de arquitetura. Retorne em breve.'}
+                                    </p>
+                                </div>
+                                <FluidButton
+                                    onClick={() => setActiveTab('overview')}
+                                    variant="glass"
+                                    className="px-8"
+                                >
+                                    {language === 'en' ? 'Return to Command' : 'Retornar ao Comando'}
+                                </FluidButton>
+                            </div>
+                        )}
                     </div>
                 </main>
             </div>
