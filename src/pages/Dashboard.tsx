@@ -19,6 +19,8 @@ import {
     Globe,
     Menu,
     X,
+    Check,
+    Edit2,
     AlertTriangle,
     User,
     Shield,
@@ -116,6 +118,30 @@ export default function Dashboard() {
         </>
     );
 
+    const [isEditingUsername, setIsEditingUsername] = useState(false);
+    const [usernameInput, setUsernameInput] = useState('');
+    const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+
+    const handleUpdateUsername = async () => {
+        if (!usernameInput.trim() || !user) return;
+        setIsUpdatingProfile(true);
+        try {
+            const { error } = await supabase
+                .from('profiles')
+                .update({ username: usernameInput })
+                .eq('id', user.id);
+
+            if (error) throw error;
+
+            await useAuthStore.getState().refreshProfile();
+            setIsEditingUsername(false);
+        } catch (error) {
+            console.error('Error updating username:', error);
+        } finally {
+            setIsUpdatingProfile(false);
+        }
+    };
+
     const handleResetProgress = async () => {
         if (resetConfirmText !== 'Resetar' || !user) return;
 
@@ -178,12 +204,30 @@ export default function Dashboard() {
                         </div>
                     </div>
                     <div className="p-4 rounded-xl bg-black/40 border border-white/10">
-                        <div className="text-xs text-gray-500 uppercase tracking-widest mb-2">CODENAME</div>
+                        <div className="text-xs text-gray-500 uppercase tracking-widest mb-2 flex justify-between items-center">
+                            CODENAME
+                            {!isEditingUsername ? (
+                                <button onClick={() => { setUsernameInput(profile?.username || ''); setIsEditingUsername(true); }} className="text-liquid-primary hover:text-white transition-colors">
+                                    <Edit2 size={14} />
+                                </button>
+                            ) : (
+                                <div className="flex gap-2">
+                                    <button onClick={handleUpdateUsername} disabled={isUpdatingProfile} className="text-green-500 hover:text-green-400">
+                                        <Check size={14} />
+                                    </button>
+                                    <button onClick={() => setIsEditingUsername(false)} className="text-white/50 hover:text-white">
+                                        <X size={14} />
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                         <input
                             type="text"
-                            value={profile?.username || user?.user_metadata?.username || 'Agent'}
-                            readOnly
-                            className="w-full bg-transparent text-white font-mono border-b border-white/20 focus:border-liquid-primary outline-none py-1"
+                            value={isEditingUsername ? usernameInput : (profile?.username || user?.user_metadata?.username || 'Agent')}
+                            readOnly={!isEditingUsername}
+                            onChange={(e) => setUsernameInput(e.target.value)}
+                            className={`w-full bg-transparent text-white font-mono border-b outline-none py-1 transition-colors ${isEditingUsername ? 'border-liquid-primary' : 'border-white/20'
+                                }`}
                         />
                     </div>
                 </div>
