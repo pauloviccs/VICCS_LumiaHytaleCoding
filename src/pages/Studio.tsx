@@ -33,10 +33,12 @@ export default function Studio() {
     const [isTipRevealed, setIsTipRevealed] = useState(false);
 
     // Dynamic Content based on Language
-    const lessonTitle = language === 'en' ? activeLesson?.title : (activeLesson?.title_pt || activeLesson?.title);
-    const lessonContent = language === 'en' ? activeLesson?.content : (activeLesson?.content_pt || activeLesson?.content);
-    const lessonLore = language === 'en' ? activeLesson?.lore : (activeLesson?.lore_pt || activeLesson?.lore);
+    // Database has: title/content/lore (PT) and title_en/content_en/lore_en (EN)
+    const lessonTitle = language === 'en' ? (activeLesson?.title_en || activeLesson?.title) : activeLesson?.title;
+    const lessonContent = language === 'en' ? (activeLesson?.content_en || activeLesson?.content) : activeLesson?.content;
+    const lessonLore = language === 'en' ? (activeLesson?.lore_en || activeLesson?.lore) : activeLesson?.lore;
     const lessonTip = language === 'en' ? activeLesson?.tip_en : activeLesson?.tip_pt;
+
 
     // Reset tip reveal on lesson change
     useEffect(() => {

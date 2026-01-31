@@ -58,11 +58,11 @@ export type Database = {
                     validation_value: string | null
                     starter_code: string | null
                     lore: string | null
-                    lore_pt: string | null
+                    lore_en: string | null
                     tip_en: string | null
                     tip_pt: string | null
-                    title_pt: string | null
-                    content_pt: string | null
+                    title_en: string | null
+                    content_en: string | null
                 }
                 Insert: {
                     content?: string | null
@@ -77,11 +77,11 @@ export type Database = {
                     validation_value?: string | null
                     starter_code?: string | null
                     lore?: string | null
-                    lore_pt?: string | null
+                    lore_en?: string | null
                     tip_en?: string | null
                     tip_pt?: string | null
-                    title_pt?: string | null
-                    content_pt?: string | null
+                    title_en?: string | null
+                    content_en?: string | null
                 }
                 Update: {
                     content?: string | null
