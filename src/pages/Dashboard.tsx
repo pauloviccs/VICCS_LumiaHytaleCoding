@@ -123,7 +123,7 @@ export default function Dashboard() {
 
         setIsResetting(true);
         try {
-            // 1. Delete all user progress records
+            // 1. Delete all user progress records from database
             const { error: progressError } = await supabase
                 .from('user_progress')
                 .delete()
@@ -139,11 +139,11 @@ export default function Dashboard() {
 
             if (profileError) throw profileError;
 
-            // 3. Refresh local state
-            await fetchUserProgress(user.id);
+            // 3. Clear local state in stores
+            useCourseStore.getState().resetUserProgress();
             await useAuthStore.getState().refreshProfile();
 
-            // 4. Close modal and reset
+            // 4. Close modal and reset form
             setShowResetModal(false);
             setResetConfirmText('');
 
@@ -408,8 +408,8 @@ export default function Dashboard() {
                                         onClick={handleResetProgress}
                                         disabled={resetConfirmText !== 'Resetar' || isResetting}
                                         className={`flex-1 px-4 py-3 rounded-lg font-semibold transition-all ${resetConfirmText === 'Resetar' && !isResetting
-                                                ? 'bg-red-500 text-white hover:bg-red-600'
-                                                : 'bg-red-500/20 text-red-500/50 cursor-not-allowed'
+                                            ? 'bg-red-500 text-white hover:bg-red-600'
+                                            : 'bg-red-500/20 text-red-500/50 cursor-not-allowed'
                                             }`}
                                     >
                                         {isResetting

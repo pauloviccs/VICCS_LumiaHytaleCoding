@@ -28,6 +28,7 @@ interface CourseState {
     isModuleLocked: (moduleId: string) => boolean;
     getNextLesson: (courseId: string) => { moduleId: string; lessonId: string } | undefined;
     getLastActiveCourseId: () => string | undefined;
+    resetUserProgress: () => void;
 }
 
 export const useCourseStore = create<CourseState>((set, get) => ({
@@ -262,5 +263,9 @@ export const useCourseStore = create<CourseState>((set, get) => ({
         }
 
         return undefined;
+    },
+
+    resetUserProgress: () => {
+        set({ userProgress: [] });
     }
 }));
