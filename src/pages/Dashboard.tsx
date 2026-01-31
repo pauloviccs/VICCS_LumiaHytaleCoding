@@ -44,6 +44,8 @@ export default function Dashboard() {
         fetchCourses();
         if (user) {
             fetchUserProgress(user.id);
+            // Also refresh profile to get latest XP/streak from database
+            useAuthStore.getState().refreshProfile();
         }
     }, [fetchCourses, fetchUserProgress, user]);
 

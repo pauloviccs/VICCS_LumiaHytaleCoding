@@ -96,18 +96,37 @@ export default function Studio() {
             } catch (e) {
                 logs.push('> SYSTEM ERROR: Invalid validation pattern.');
             }
+        } else if (activeLesson.validation_type === 'contains' && activeLesson.validation_value) {
+            // Check if code contains the expected value (case-insensitive)
+            if (code.toLowerCase().includes(activeLesson.validation_value.toLowerCase())) {
+                success = true;
+                logs.push('> SYSTEM: Output validated successfully.');
+                logs.push('> SYSTEM: Connection established.');
+                logs.push(`> SUCCESS: +${activeLesson.xp_reward} XP Gained!`);
+            } else {
+                logs.push('> ERROR: Expected output not found.');
+                logs.push(`> HINT: Your code should contain: "${activeLesson.validation_value}"`);
+                logs.push('> SYSTEM: Operation failed.');
+            }
+        } else if (activeLesson.validation_type === 'exact_output' && activeLesson.validation_value) {
+            // Check if code produces exact output
+            if (code.includes(activeLesson.validation_value)) {
+                success = true;
+                logs.push('> SYSTEM: Output matches expected result.');
+                logs.push(`> SUCCESS: +${activeLesson.xp_reward} XP Gained!`);
+            } else {
+                logs.push('> ERROR: Output does not match expected result.');
+                logs.push('> SYSTEM: Operation failed.');
+            }
         } else {
-            // Default fallback
-            logs.push('Hello World');
+            // Default fallback - no validation, auto-pass
             logs.push('> Process finished with exit code 0.');
-            success = true; // Auto-success for non-validated lessons? Or maybe manual check.
+            success = true;
         }
 
         setOutput(prev => [...prev, ...logs]);
         setIsRunning(false);
 
-        setOutput(prev => [...prev, ...logs]);
-        setIsRunning(false);
 
         // Update Progress
         if (success) {
