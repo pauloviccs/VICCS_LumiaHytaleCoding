@@ -31,11 +31,13 @@ import {
     Plus,
     Folder,
     Trash2,
-    FileCode
+    FileCode,
+    Box
 } from 'lucide-react';
 import { useLangStore } from '@/store/langStore';
 import { supabase } from '@/lib/supabase';
 import { useProjectStore } from '@/store/projectStore';
+import { BlockbenchGuide } from './BlockbenchGuide';
 
 const ProjectsView = () => {
     const { projects, fetchProjects, createProject, deleteProject, loading } = useProjectStore();
@@ -131,8 +133,8 @@ const ProjectsView = () => {
                                     key={t}
                                     onClick={() => setTemplate(t)}
                                     className={`px-3 py-1 text-xs rounded-full border transition-colors uppercase ${template === t
-                                            ? 'bg-liquid-primary text-black border-liquid-primary font-bold shadow-[0_0_10px_rgba(0,243,255,0.4)]'
-                                            : 'bg-black/40 border-white/20 text-gray-400 hover:border-white/50'
+                                        ? 'bg-liquid-primary text-black border-liquid-primary font-bold shadow-[0_0_10px_rgba(0,243,255,0.4)]'
+                                        : 'bg-black/40 border-white/20 text-gray-400 hover:border-white/50'
                                         }`}
                                 >
                                     {t}
@@ -239,6 +241,7 @@ export default function Dashboard() {
                 <nav className="space-y-2">
                     <NavButton icon={<Dna size={20} />} label={t('dash.nav.overview')} active={activeTab === 'overview'} onClick={() => { setActiveTab('overview'); setIsSidebarOpen(false); }} />
                     <NavButton icon={<Terminal size={20} />} label={t('dash.nav.projects')} active={activeTab === 'projects'} onClick={() => { setActiveTab('projects'); setIsSidebarOpen(false); }} />
+                    <NavButton icon={<Box size={20} />} label={language === 'en' ? 'Blockbench Guide' : 'Manual Blockbench'} active={activeTab === 'blockbench'} onClick={() => { setActiveTab('blockbench'); setIsSidebarOpen(false); }} />
                     <NavButton icon={<BookOpen size={20} />} label={t('dash.nav.docs')} active={activeTab === 'docs'} onClick={() => { setActiveTab('docs'); setIsSidebarOpen(false); }} />
                     <NavButton icon={<Settings size={20} />} label={t('dash.nav.settings')} active={activeTab === 'settings'} onClick={() => { setActiveTab('settings'); setIsSidebarOpen(false); }} />
                 </nav>
@@ -521,9 +524,11 @@ export default function Dashboard() {
                                         ? (language === 'en' ? 'System Settings' : 'Configurações do Sistema')
                                         : activeTab === 'projects'
                                             ? (language === 'en' ? 'Project Portfolio' : 'Portfólio de Projetos')
-                                            : activeTab === 'docs'
-                                                ? (language === 'en' ? 'Knowledge Base' : 'Base de Conhecimento')
-                                                : t('dash.command_center')}
+                                            : activeTab === 'blockbench'
+                                                ? (language === 'en' ? 'Blockbench Guide' : 'Manual de Modelagem')
+                                                : activeTab === 'docs'
+                                                    ? (language === 'en' ? 'Knowledge Base' : 'Base de Conhecimento')
+                                                    : t('dash.command_center')}
                                 </h1>
                                 <p className="text-gray-400 text-sm md:text-base">{t('dash.welcome')}</p>
                             </div>
@@ -673,6 +678,8 @@ export default function Dashboard() {
                         {activeTab === 'settings' && <SettingsView />}
 
                         {activeTab === 'projects' && <ProjectsView />}
+
+                        {activeTab === 'blockbench' && <BlockbenchGuide />}
 
                         {(activeTab === 'docs') && (
                             <div className="flex flex-col items-center justify-center py-20 text-center space-y-6 animate-in fade-in zoom-in duration-500">
