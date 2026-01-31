@@ -5,6 +5,7 @@ import Studio from '@/pages/Studio';
 import Documentation from '@/pages/Documentation';
 import { useAuthStore } from '@/store/authStore';
 import { useViewStore } from '@/store/viewStore';
+import { AmbientBackground } from '@/components/layout/AmbientBackground';
 
 function App() {
   const { initialize, user, loading } = useAuthStore();
@@ -26,6 +27,7 @@ function App() {
 
   return (
     <>
+      <AmbientBackground />
       {currentView === 'dashboard' && user && <Dashboard />}
       {currentView === 'studio' && user && <Studio />}
       {((currentView as string) === 'documentation' || (!user && (currentView as string) === 'documentation')) && <Documentation />}

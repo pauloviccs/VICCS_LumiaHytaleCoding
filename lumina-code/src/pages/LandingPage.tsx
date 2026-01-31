@@ -1,16 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { GlassLayout } from '@/components/layout/GlassLayout';
 import { Navbar } from '@/components/layout/Navbar';
 import { AuthModal } from '@/components/auth/AuthModal';
-import { motion } from 'framer-motion';
+import { FluidButton, FluidCard } from '@/components/ui/FluidDesign';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Terminal, Gamepad2, Database, Zap, ArrowRight, Shield, Code } from 'lucide-react';
 import { useViewStore } from '@/store/viewStore';
 import { useLangStore } from '@/store/langStore';
+
+const backgrounds = [
+    '/assets/backgrounds/background_7.jpg',
+    '/assets/backgrounds/background_8.jpg',
+    '/assets/backgrounds/background_9.jpg'
+];
 
 function LandingPage() {
     const [isAuthOpen, setIsAuthOpen] = useState(false);
     const { setView } = useViewStore();
     const { t, language } = useLangStore();
+    const [currentBgIndex, setCurrentBgIndex] = useState(0);
+
+    // Background Cycle Effect
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentBgIndex((prev) => (prev + 1) % backgrounds.length);
+        }, 8000); // Faster cycle for Hero (8s)
+        return () => clearInterval(timer);
+    }, []);
 
     // Mouse Parallax Logic
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -36,19 +52,31 @@ function LandingPage() {
             >
                 {/* Mouse Tracking Background */}
                 <motion.div
-                    className="absolute inset-0 z-0"
+                    className="absolute inset-0 z-0 overflow-hidden"
                     animate={{
                         x: mousePosition.x * -1,
                         y: mousePosition.y * -1,
-                        scale: 1.05 // Slight zoom to prevent edge clipping
+                        scale: 1.1 // Increased scale for safe parallax edges
                     }}
                     transition={{ type: 'tween', ease: 'linear', duration: 0.2 }}
                 >
-                    <div
-                        className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-screen pointer-events-none"
-                        style={{ backgroundImage: 'url(/assets/background_9.jpg)' }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black pointer-events-none" />
+                    <AnimatePresence mode="popLayout">
+                        <motion.div
+                            key={currentBgIndex}
+                            initial={{ opacity: 0, scale: 1.1 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 3, ease: "easeInOut" }}
+                            className="absolute inset-0 w-full h-full"
+                        >
+                            <img
+                                src={backgrounds[currentBgIndex]}
+                                alt="Hero Background"
+                                className="w-full h-full object-cover opacity-60 filter blur-[6px] mix-blend-screen"
+                            />
+                        </motion.div>
+                    </AnimatePresence>
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/60 to-black z-10 pointer-events-none" />
                 </motion.div>
 
                 <div className="container mx-auto px-6 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -58,14 +86,14 @@ function LandingPage() {
                         initial={{ opacity: 0, x: -50 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.8, ease: "easeOut" }}
-                        className="space-y-8"
+                        className="space-y-8 relative z-20"
                     >
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm text-sm font-mono text-liquid-primary">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm text-xs md:text-sm font-mono text-liquid-primary">
                             <span className="animate-pulse w-2 h-2 rounded-full bg-liquid-primary" />
                             {t('hero.system_online')}
                         </div>
 
-                        <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9]">
+                        <h1 className="text-5xl sm:text-6xl md:text-8xl font-black tracking-tighter leading-[0.9]">
                             {language === 'en' ? (
                                 <>
                                     CODE <br />
@@ -91,26 +119,26 @@ function LandingPage() {
                             )}
                         </h1>
 
-                        <p className="text-xl text-gray-300 max-w-lg leading-relaxed drop-shadow-md">
+                        <p className="text-lg md:text-xl text-gray-300 max-w-lg leading-relaxed drop-shadow-md">
                             {t('hero.subtitle')}
                         </p>
 
-                        <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                            <button
+                        <div className="flex flex-col sm:flex-row gap-4 pt-4 w-full sm:w-auto">
+                            <FluidButton
                                 onClick={() => setIsAuthOpen(true)}
-                                className="group relative px-8 py-4 bg-liquid-primary text-black font-bold text-lg tracking-wider clip-path-slant hover:bg-white transition-all duration-300 shadow-[0_0_30px_rgba(0,243,255,0.4)] hover:shadow-[0_0_50px_rgba(0,243,255,0.6)]"
+                                variant="primary"
+                                className="w-full sm:w-auto text-lg tracking-wider"
                             >
-                                <span className="relative z-10 flex items-center gap-2">
-                                    {t('hero.start_mission')} <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                                </span>
-                            </button>
+                                {t('hero.start_mission')} <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                            </FluidButton>
 
-                            <button
+                            <FluidButton
                                 onClick={() => setView('documentation')}
-                                className="px-8 py-4 bg-black/40 backdrop-blur-md border border-white/20 text-white font-bold text-lg tracking-wider clip-path-slant hover:bg-white/10 hover:border-white/50 transition-all duration-300 shadow-lg"
+                                variant="glass"
+                                className="w-full sm:w-auto text-lg tracking-wider"
                             >
                                 {t('hero.view_docs')}
-                            </button>
+                            </FluidButton>
                         </div>
                     </motion.div>
 
@@ -211,7 +239,7 @@ public class LiquidSword extends Item {
 }
 
 const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) => (
-    <div className="glass-card p-8 group hover:-translate-y-2 transition-transform duration-300 border border-white/5 hover:border-liquid-primary/30 bg-white/5">
+    <FluidCard className="group">
         <div className="mb-6 p-4 bg-white/5 rounded-lg w-fit group-hover:bg-white/10 transition-colors">
             {icon}
         </div>
@@ -219,7 +247,7 @@ const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode, titl
         <p className="text-gray-400 leading-relaxed">
             {description}
         </p>
-    </div>
+    </FluidCard>
 )
 
 export default LandingPage

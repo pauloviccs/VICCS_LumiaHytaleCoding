@@ -58,7 +58,24 @@ const translations: Record<Language, Record<string, string>> = {
         'dash.ago': 'hours ago',
         'dash.upcoming': 'Upcoming Modules',
         'dash.locked': 'Locked',
+        'dash.unlocked': 'Unlocked',
         'dash.no_modules': 'No additional modules detected.',
+
+        // Studio
+        'studio.run': 'RUN',
+        'studio.objectives': 'OBJECTIVES',
+        'studio.console': 'CONSOLE OUTPUT',
+        'studio.tip': 'TIP',
+        'studio.success': 'MISSION COMPLETE',
+        'studio.next': 'NEXT MISSION',
+        'studio.loading': 'Loading execution environment...',
+        'studio.compiling': 'Compiling...',
+        'studio.running': 'Running Main.java...',
+        'studio.complete_xp': 'Complete the exercise to earn {xp} XP.',
+        'studio.success_msg': 'Signal matches expected pattern.',
+        'studio.fail_msg': 'Signal signature mismatch.',
+        'studio.error_msg': 'Invalid validation pattern.',
+        'dash.no_activity': 'No recent activity recorded.',
     },
     'pt-br': {
         // Landing Page
@@ -107,7 +124,24 @@ const translations: Record<Language, Record<string, string>> = {
         'dash.ago': 'horas atrás',
         'dash.upcoming': 'Próximos Módulos',
         'dash.locked': 'Bloqueado',
+        'dash.unlocked': 'Desbloqueado',
         'dash.no_modules': 'Nenhum módulo adicional detectado.',
+
+        // Studio
+        'studio.run': 'EXECUTAR',
+        'studio.objectives': 'OBJETIVOS',
+        'studio.console': 'SAÍDA DO CONSOLE',
+        'studio.tip': 'DICA',
+        'studio.success': 'MISSÃO CUMPRIDA',
+        'studio.next': 'PRÓXIMA MISSÃO',
+        'studio.loading': 'Carregando ambiente de execução...',
+        'studio.compiling': 'Compilando...',
+        'studio.running': 'Executando Main.java...',
+        'studio.complete_xp': 'Complete o exercício para ganhar {xp} XP.',
+        'studio.success_msg': 'Sinal corresponde ao padrão esperado.',
+        'studio.fail_msg': 'Assinatura do sinal incorreta.',
+        'studio.error_msg': 'Padrão de validação inválido.',
+        'dash.no_activity': 'Nenhuma atividade recente registrada.',
     }
 };
 
