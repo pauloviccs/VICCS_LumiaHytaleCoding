@@ -61,6 +61,8 @@ export default function Studio() {
                 : activeModule.lessons[0];
 
             if (lesson) {
+                console.log('[Studio] Loading lesson:', lesson.title);
+                console.log('[Studio] Validation:', { type: lesson.validation_type, value: lesson.validation_value });
                 setActiveLesson(lesson);
                 setCode(lesson.starter_code || '');
                 setOutput(['> System initialized.', '> Ready for input...', `> Loaded: ${lesson.title}`]);
@@ -70,6 +72,11 @@ export default function Studio() {
 
     const handleRun = async () => {
         if (!activeLesson) return;
+
+        console.log('[Studio] Running validation for:', activeLesson.title);
+        console.log('[Studio] Validation type:', activeLesson.validation_type);
+        console.log('[Studio] Validation value:', activeLesson.validation_value);
+        console.log('[Studio] Code to validate:', code.substring(0, 200));
 
         setIsRunning(true);
         setOutput(prev => [...prev, '> Compiling...', '> Running Main.java...']);
