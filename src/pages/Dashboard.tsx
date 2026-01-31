@@ -239,9 +239,15 @@ export default function Dashboard() {
                                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-liquid-primary/10 text-liquid-primary text-xs font-bold mb-4 border border-liquid-primary/20">
                                         {t('dash.objective')}
                                     </div>
-                                    <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">{activeCourse?.title || t('dash.loading')}</h2>
+                                    <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
+                                        {language === 'en'
+                                            ? (activeCourse?.title || t('dash.loading'))
+                                            : ((activeCourse as any)?.title_pt || activeCourse?.title || t('dash.loading'))}
+                                    </h2>
                                     <p className="text-gray-300 max-w-xl mb-6 text-sm md:text-base">
-                                        {activeCourse?.description || t('dash.syncing')}
+                                        {language === 'en'
+                                            ? (activeCourse?.description || t('dash.syncing'))
+                                            : ((activeCourse as any)?.description_pt || activeCourse?.description || t('dash.syncing'))}
                                     </p>
                                     <FluidButton
                                         onClick={() => {
