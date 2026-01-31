@@ -20,7 +20,13 @@ import {
     Menu,
     X,
     Trash2,
-    AlertTriangle
+    AlertTriangle,
+    User,
+    Shield,
+    CreditCard,
+    Mail,
+    Key,
+    Sparkles
 } from 'lucide-react';
 import { useLangStore } from '@/store/langStore';
 import { supabase } from '@/lib/supabase';
@@ -99,14 +105,7 @@ export default function Dashboard() {
                 </nav>
             </div>
 
-            <div className="mt-auto p-6 border-t border-white/10 space-y-2">
-                <button
-                    onClick={() => setShowResetModal(true)}
-                    className="flex items-center gap-3 text-red-400 hover:text-red-300 transition-colors w-full p-2 rounded-lg hover:bg-red-500/10"
-                >
-                    <Trash2 size={20} />
-                    <span className="font-medium">{language === 'en' ? 'Reset Progress' : 'Resetar Progresso'}</span>
-                </button>
+            <div className="mt-auto p-6 border-t border-white/10">
                 <button
                     onClick={() => signOut()}
                     className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors w-full p-2 rounded-lg hover:bg-white/5"
@@ -154,6 +153,135 @@ export default function Dashboard() {
             setIsResetting(false);
         }
     };
+
+    const SettingsView = () => (
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Identity */}
+            <div className="space-y-4">
+                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                    <User className="text-liquid-primary" />
+                    {language === 'en' ? 'Identity Protocol' : 'Protocolo de Identidade'}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-4 rounded-xl bg-black/40 border border-white/10 flex items-center gap-4">
+                        <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-liquid-primary to-purple-500 p-[1px]">
+                            <img
+                                src={profile?.avatar_url || user?.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/shapes/svg?seed=${user?.email}`}
+                                alt="Avatar"
+                                className="w-full h-full rounded-full object-cover bg-black"
+                            />
+                        </div>
+                        <div>
+                            <div className="text-xs text-gray-500 uppercase tracking-widest mb-1">AVATAR</div>
+                            <button className="text-sm text-liquid-primary hover:text-white transition-colors">
+                                {language === 'en' ? 'Regenerate Signature' : 'Regenerar Assinatura'}
+                            </button>
+                        </div>
+                    </div>
+                    <div className="p-4 rounded-xl bg-black/40 border border-white/10">
+                        <div className="text-xs text-gray-500 uppercase tracking-widest mb-2">CODENAME</div>
+                        <input
+                            type="text"
+                            value={profile?.username || user?.user_metadata?.username || 'Agent'}
+                            readOnly
+                            className="w-full bg-transparent text-white font-mono border-b border-white/20 focus:border-liquid-primary outline-none py-1"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* Security */}
+            <div className="space-y-4">
+                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                    <Shield className="text-green-500" />
+                    {language === 'en' ? 'Security Clearance' : 'Credenciais de Segurança'}
+                </h3>
+                <div className="p-6 rounded-xl bg-black/40 border border-white/10 space-y-4">
+                    <div className="flex flex-col md:flex-row gap-4 items-center">
+                        <Mail className="text-gray-500" />
+                        <div className="flex-1 w-full">
+                            <div className="text-xs text-gray-500 uppercase">Registered Email</div>
+                            <div className="text-white font-mono">{user?.email}</div>
+                        </div>
+                        <FluidButton variant="secondary" className="w-full md:w-auto text-xs">
+                            {language === 'en' ? 'Update Email' : 'Atualizar Email'}
+                        </FluidButton>
+                    </div>
+                    <div className="h-px bg-white/5" />
+                    <div className="flex flex-col md:flex-row gap-4 items-center">
+                        <Key className="text-gray-500" />
+                        <div className="flex-1 w-full">
+                            <div className="text-xs text-gray-500 uppercase">Access Key</div>
+                            <div className="text-white font-mono">••••••••••••••••</div>
+                        </div>
+                        <FluidButton variant="secondary" className="w-full md:w-auto text-xs">
+                            {language === 'en' ? 'Rotate Key' : 'Redefinir Senha'}
+                        </FluidButton>
+                    </div>
+                </div>
+            </div>
+
+            {/* Plan */}
+            <div className="space-y-4">
+                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                    <CreditCard className="text-yellow-500" />
+                    {language === 'en' ? 'Operation Status' : 'Status Operacional'}
+                </h3>
+                <div className="relative p-6 rounded-xl border border-yellow-500/30 bg-gradient-to-br from-yellow-500/5 to-transparent overflow-hidden">
+                    <div className="absolute top-0 right-0 p-4">
+                        <div className="px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-500 text-xs font-bold border border-yellow-500/30">
+                            FREE TIER
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="w-12 h-12 rounded-lg bg-yellow-500/20 flex items-center justify-center">
+                            <Sparkles className="text-yellow-500" />
+                        </div>
+                        <div>
+                            <div className="text-2xl font-bold text-white">Lumina Agent</div>
+                            <div className="text-yellow-500/80 text-sm">Level 1 Clearance</div>
+                        </div>
+                    </div>
+                    <p className="text-gray-400 text-sm mb-6 max-w-lg">
+                        {language === 'en'
+                            ? 'You have basic access to all training modules and standard cloud storage.'
+                            : 'Você tem acesso básico a todos os módulos de treinamento e armazenamento padrão na nuvem.'}
+                    </p>
+                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                        <span>Running on local instances</span>
+                        <span>•</span>
+                        <span>Valid until 2077</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Danger Zone */}
+            <div className="space-y-4 pt-8 border-t border-white/10">
+                <h3 className="text-xl font-bold text-red-500 flex items-center gap-2">
+                    <AlertTriangle className="text-red-500" />
+                    {language === 'en' ? 'Danger Zone' : 'Zona de Perigo'}
+                </h3>
+                <div className="p-6 rounded-xl bg-red-500/5 border border-red-500/20 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                        <h4 className="text-white font-bold mb-1">
+                            {language === 'en' ? 'Factory Reset' : 'Reset Geral'}
+                        </h4>
+                        <p className="text-red-400/80 text-sm">
+                            {language === 'en'
+                                ? 'Irreversible action. Wipes all progress and local data.'
+                                : 'Ação irreversível. Apaga todo o progresso e dados locais.'}
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => setShowResetModal(true)}
+                        className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/50 rounded-lg transition-colors font-bold text-sm whitespace-nowrap"
+                    >
+                        {language === 'en' ? 'INITIATE WIPE' : 'INICIAR RESET'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
 
     return (
         <GlassLayout>
@@ -207,7 +335,7 @@ export default function Dashboard() {
                         {/* Header */}
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
-                                <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">{t('dash.command_center')}</h1>
+                                <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">{activeTab === 'settings' ? (language === 'en' ? 'System Settings' : 'Configurações do Sistema') : t('dash.command_center')}</h1>
                                 <p className="text-gray-400 text-sm md:text-base">{t('dash.welcome')}</p>
                             </div>
                             <div className="flex gap-4 items-center self-end md:self-auto">
@@ -225,127 +353,135 @@ export default function Dashboard() {
                             </div>
                         </div>
 
-                        {/* Next Lesson Card (Hero for Dashboard) */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="relative p-6 md:p-8 rounded-2xl border border-liquid-primary/30 overflow-hidden group"
-                        >
-                            <div className="absolute inset-0 bg-gradient-to-r from-liquid-primary/10 to-transparent transition-opacity group-hover:opacity-80" />
-                            <div className="absolute inset-0 backdrop-blur-sm -z-10" />
+                        {activeTab === 'overview' && (
+                            <>
+                                {/* Next Lesson Card (Hero for Dashboard) */}
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="relative p-6 md:p-8 rounded-2xl border border-liquid-primary/30 overflow-hidden group"
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-r from-liquid-primary/10 to-transparent transition-opacity group-hover:opacity-80" />
+                                    <div className="absolute inset-0 backdrop-blur-sm -z-10" />
 
-                            <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
-                                <div className="w-full">
-                                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-liquid-primary/10 text-liquid-primary text-xs font-bold mb-4 border border-liquid-primary/20">
-                                        {t('dash.objective')}
-                                    </div>
-                                    <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
-                                        {language === 'en'
-                                            ? (activeCourse?.title || t('dash.loading'))
-                                            : ((activeCourse as any)?.title_pt || activeCourse?.title || t('dash.loading'))}
-                                    </h2>
-                                    <p className="text-gray-300 max-w-xl mb-6 text-sm md:text-base">
-                                        {language === 'en'
-                                            ? (activeCourse?.description || t('dash.syncing'))
-                                            : ((activeCourse as any)?.description_pt || activeCourse?.description || t('dash.syncing'))}
-                                    </p>
-                                    <FluidButton
-                                        onClick={() => {
-                                            // Use intelligent resume: find next uncompleted lesson
-                                            const nextLesson = activeCourse ? getNextLesson(activeCourse.id) : undefined;
-                                            if (nextLesson) {
-                                                setView('studio', { moduleId: nextLesson.moduleId, lessonId: nextLesson.lessonId });
-                                            } else if (activeCourse?.modules?.[0]?.id) {
-                                                // Fallback to first module if no next lesson found
-                                                setView('studio', { moduleId: activeCourse.modules[0].id });
-                                            } else {
-                                                setView('studio');
-                                            }
-                                        }}
-                                        variant="secondary"
-                                        className="w-full md:w-auto text-black"
-                                    >
-                                        <Play size={18} fill="currentColor" /> {t('dash.resume')}
-                                    </FluidButton>
-                                </div>
-
-                                {/* Visual Progress Ring */}
-                                <div className="hidden lg:block relative w-32 h-32 shrink-0">
-                                    <svg className="w-full h-full -rotate-90">
-                                        <circle cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-gray-800" />
-                                        <circle
-                                            cx="64"
-                                            cy="64"
-                                            r="58"
-                                            stroke="currentColor"
-                                            strokeWidth="8"
-                                            fill="transparent"
-                                            strokeDasharray="364"
-                                            strokeDashoffset={364 - (364 * (getCourseProgress(activeCourse?.id) / 100))}
-                                            className="text-liquid-primary drop-shadow-[0_0_10px_rgba(0,243,255,0.5)] transition-all duration-1000 ease-out"
-                                        />
-                                    </svg>
-                                    <div className="absolute inset-0 flex items-center justify-center flex-col">
-                                        <span className="text-2xl font-bold text-white">{getCourseProgress(activeCourse?.id)}%</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </motion.div>
-
-                        {/* Content Grid */}
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            {/* Recent Activity */}
-                            <FluidCard className="border border-white/10">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h3 className="text-lg md:text-xl font-bold text-white">{t('dash.mission_log')}</h3>
-                                    <button className="text-xs text-liquid-primary hover:underline">{t('dash.view_all')}</button>
-                                </div>
-                                <div className="space-y-4">
-                                    {getRecentActivity().map((activity, i) => (
-                                        <div key={i} className="flex items-center gap-4 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer group">
-                                            <div className="w-10 h-10 rounded-lg bg-black/50 flex items-center justify-center border border-white/10 group-hover:border-liquid-primary/50 transition-colors shrink-0">
-                                                <Terminal size={18} className="text-gray-400 group-hover:text-liquid-primary" />
+                                    <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
+                                        <div className="w-full">
+                                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-liquid-primary/10 text-liquid-primary text-xs font-bold mb-4 border border-liquid-primary/20">
+                                                {t('dash.objective')}
                                             </div>
-                                            <div className="min-w-0">
-                                                <div className="text-white font-medium text-sm truncate">
-                                                    {t('dash.completed')} "{activity.lessons?.title || 'Unknown'}"
-                                                </div>
-                                                <div className="text-gray-500 text-xs">
-                                                    {new Date(activity.completed_at || '').toLocaleDateString()} • +{activity.lessons?.xp_reward || 0} XP
-                                                </div>
-                                            </div>
-                                            <ChevronRight size={16} className="ml-auto text-gray-600 group-hover:text-white shrink-0" />
+                                            <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
+                                                {language === 'en'
+                                                    ? (activeCourse?.title || t('dash.loading'))
+                                                    : ((activeCourse as any)?.title_pt || activeCourse?.title || t('dash.loading'))}
+                                            </h2>
+                                            <p className="text-gray-300 max-w-xl mb-6 text-sm md:text-base">
+                                                {language === 'en'
+                                                    ? (activeCourse?.description || t('dash.syncing'))
+                                                    : ((activeCourse as any)?.description_pt || activeCourse?.description || t('dash.syncing'))}
+                                            </p>
+                                            <FluidButton
+                                                onClick={() => {
+                                                    // Use intelligent resume: find next uncompleted lesson
+                                                    const nextLesson = activeCourse ? getNextLesson(activeCourse.id) : undefined;
+                                                    if (nextLesson) {
+                                                        setView('studio', { moduleId: nextLesson.moduleId, lessonId: nextLesson.lessonId });
+                                                    } else if (activeCourse?.modules?.[0]?.id) {
+                                                        // Fallback to first module if no next lesson found
+                                                        setView('studio', { moduleId: activeCourse.modules[0].id });
+                                                    } else {
+                                                        setView('studio');
+                                                    }
+                                                }}
+                                                variant="secondary"
+                                                className="w-full md:w-auto text-black"
+                                            >
+                                                <Play size={18} fill="currentColor" /> {t('dash.resume')}
+                                            </FluidButton>
                                         </div>
-                                    ))}
-                                    {getRecentActivity().length === 0 && (
-                                        <div className="text-gray-500 text-sm text-center py-4">{t('dash.no_activity')}</div>
-                                    )}
-                                </div>
-                            </FluidCard>
 
-                            {/* Locked Modules */}
-                            <FluidCard className="border border-white/10 opacity-70">
-                                <h3 className="text-lg md:text-xl font-bold text-white mb-6">{t('dash.upcoming')}</h3>
-                                <div className="space-y-4">
-                                    {activeCourse?.modules.slice(1).map((module: any) => {
-                                        const locked = isModuleLocked(module.id);
-                                        return (
-                                            <div key={module.id} className={`p-4 border border-white/5 rounded-lg bg-black/20 flex items-center gap-4 ${locked ? 'opacity-50' : ''}`}>
-                                                {locked ? <Lock className="text-gray-600 shrink-0" size={20} /> : <div className="w-5 h-5 rounded-full border border-green-500/50 bg-green-500/20" />}
-                                                <div className="min-w-0">
-                                                    <div className="text-gray-400 font-medium truncate">{module.title}</div>
-                                                    <div className="text-xs text-gray-600 truncate">
-                                                        {locked ? t('dash.locked') : 'Unlocked'}
-                                                    </div>
-                                                </div>
+                                        {/* Visual Progress Ring */}
+                                        <div className="hidden lg:block relative w-32 h-32 shrink-0">
+                                            <svg className="w-full h-full -rotate-90">
+                                                <circle cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-gray-800" />
+                                                <circle
+                                                    cx="64"
+                                                    cy="64"
+                                                    r="58"
+                                                    stroke="currentColor"
+                                                    strokeWidth="8"
+                                                    fill="transparent"
+                                                    strokeDasharray="364"
+                                                    strokeDashoffset={364 - (364 * (getCourseProgress(activeCourse?.id) / 100))}
+                                                    className="text-liquid-primary drop-shadow-[0_0_10px_rgba(0,243,255,0.5)] transition-all duration-1000 ease-out"
+                                                />
+                                            </svg>
+                                            <div className="absolute inset-0 flex items-center justify-center flex-col">
+                                                <span className="text-2xl font-bold text-white">{getCourseProgress(activeCourse?.id)}%</span>
                                             </div>
-                                        );
-                                    }) || (
-                                            <div className="text-gray-500 text-sm">{t('dash.no_modules')}</div>
-                                        )}
+                                        </div>
+                                    </div>
+                                </motion.div>
+
+                                {/* Content Grid */}
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                    {/* Recent Activity */}
+                                    <FluidCard className="border border-white/10">
+                                        <div className="flex justify-between items-center mb-6">
+                                            <h3 className="text-lg md:text-xl font-bold text-white">{t('dash.mission_log')}</h3>
+                                            <button className="text-xs text-liquid-primary hover:underline">{t('dash.view_all')}</button>
+                                        </div>
+                                        <div className="space-y-4">
+                                            {getRecentActivity().map((activity, i) => (
+                                                <div key={i} className="flex items-center gap-4 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer group">
+                                                    <div className="w-10 h-10 rounded-lg bg-black/50 flex items-center justify-center border border-white/10 group-hover:border-liquid-primary/50 transition-colors shrink-0">
+                                                        <Terminal size={18} className="text-gray-400 group-hover:text-liquid-primary" />
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <div className="text-white font-medium text-sm truncate">
+                                                            {t('dash.completed')} "{activity.lessons?.title || 'Unknown'}"
+                                                        </div>
+                                                        <div className="text-gray-500 text-xs">
+                                                            {new Date(activity.completed_at || '').toLocaleDateString()} • +{activity.lessons?.xp_reward || 0} XP
+                                                        </div>
+                                                    </div>
+                                                    <ChevronRight size={16} className="ml-auto text-gray-600 group-hover:text-white shrink-0" />
+                                                </div>
+                                            ))}
+                                            {getRecentActivity().length === 0 && (
+                                                <div className="text-gray-500 text-sm text-center py-4">{t('dash.no_activity')}</div>
+                                            )}
+                                        </div>
+                                    </FluidCard>
+
+                                    {/* Locked Modules */}
+                                    <FluidCard className="border border-white/10 opacity-70">
+                                        <h3 className="text-lg md:text-xl font-bold text-white mb-6">{t('dash.upcoming')}</h3>
+                                        <div className="space-y-4">
+                                            {activeCourse?.modules.slice(1).map((module: any) => {
+                                                const locked = isModuleLocked(module.id);
+                                                return (
+                                                    <div key={module.id} className={`p-4 border border-white/5 rounded-lg bg-black/20 flex items-center gap-4 ${locked ? 'opacity-50' : ''}`}>
+                                                        {locked ? <Lock className="text-gray-600 shrink-0" size={20} /> : <div className="w-5 h-5 rounded-full border border-green-500/50 bg-green-500/20" />}
+                                                        <div className="min-w-0">
+                                                            <div className="text-gray-400 font-medium truncate">
+                                                                {language === 'en' ? (module.title_en || module.title) : module.title}
+                                                            </div>
+                                                            <div className="text-xs text-gray-600 truncate">
+                                                                {locked ? t('dash.locked') : t('dash.unlocked')}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }) || (
+                                                    <div className="text-gray-500 text-sm">{t('dash.no_modules')}</div>
+                                                )}
+                                        </div>
+                                    </FluidCard>
                                 </div>
-                            </FluidCard>
-                        </div>
+                            </>
+                        )}
+
+                        {activeTab === 'settings' && <SettingsView />}
                     </div>
                 </main>
             </div>

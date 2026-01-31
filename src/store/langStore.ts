@@ -58,6 +58,7 @@ const translations: Record<Language, Record<string, string>> = {
         'dash.ago': 'hours ago',
         'dash.upcoming': 'Upcoming Modules',
         'dash.locked': 'Locked',
+        'dash.unlocked': 'Unlocked',
         'dash.no_modules': 'No additional modules detected.',
 
         // Studio
@@ -123,6 +124,7 @@ const translations: Record<Language, Record<string, string>> = {
         'dash.ago': 'horas atrás',
         'dash.upcoming': 'Próximos Módulos',
         'dash.locked': 'Bloqueado',
+        'dash.unlocked': 'Desbloqueado',
         'dash.no_modules': 'Nenhum módulo adicional detectado.',
 
         // Studio
