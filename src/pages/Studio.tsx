@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
 import ReactMarkdown from 'react-markdown';
-import { Play, ArrowLeft, Terminal as TerminalIcon, Info, X, Globe } from 'lucide-react';
+import { Play, ArrowLeft, Terminal as TerminalIcon, Info, X, Globe, Save } from 'lucide-react';
 import { useViewStore } from '@/store/viewStore';
 import { useCourseStore } from '@/store/courseStore';
+import { useProjectStore } from '@/store/projectStore';
 import { useAuthStore } from '@/store/authStore';
 import { useLangStore } from '@/store/langStore';
 import { supabase } from '@/lib/supabase';
@@ -14,6 +15,7 @@ import type { Lesson } from '@/types';
 export default function Studio() {
     const { setView, context } = useViewStore();
     const { courses, fetchLessons } = useCourseStore();
+    const { projects, updateProject, fetchProjects } = useProjectStore();
     const { user } = useAuthStore();
     const { language, setLanguage, t } = useLangStore();
 
@@ -22,6 +24,9 @@ export default function Studio() {
     const activeModule = courses
         .flatMap(c => c.modules)
         .find(m => m.id === context?.moduleId);
+
+    const activeProject = context?.projectId ? projects.find(p => p.id === context.projectId) : null;
+    const isProjectMode = !!context?.projectId;
 
     const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
     const [code, setCode] = useState('');
@@ -50,10 +55,19 @@ export default function Studio() {
         if (context?.moduleId) {
             fetchLessons(context.moduleId);
         }
-    }, [context?.moduleId, fetchLessons]);
+        if (context?.projectId && projects.length === 0) {
+            fetchProjects();
+        }
+    }, [context?.moduleId, context?.projectId, fetchLessons, fetchProjects]);
 
     // Set active lesson when data is available
     useEffect(() => {
+        if (activeProject) {
+            setCode(activeProject.content || '');
+            setOutput(['> Sandbox Environment Initialized.', `> Loaded Project: ${activeProject.title}`, '> Ready for input...']);
+            return;
+        }
+
         if (activeModule?.lessons && activeModule.lessons.length > 0) {
             // Default to first lesson if no lessonId is provided
             const lesson = context?.lessonId
@@ -68,9 +82,19 @@ export default function Studio() {
                 setOutput(['> System initialized.', '> Ready for input...', `> Loaded: ${lesson.title}`]);
             }
         }
-    }, [activeModule, context?.lessonId]);
+    }, [activeModule, context?.lessonId, activeProject]);
 
     const handleRun = async () => {
+        if (isProjectMode && activeProject) {
+            setIsRunning(true);
+            setOutput(prev => [...prev, `> Saving ${activeProject.title}...`]);
+            await updateProject(activeProject.id, { content: code });
+            await new Promise(r => setTimeout(r, 500));
+            setOutput(prev => [...prev, '> Project saved successfully.']);
+            setIsRunning(false);
+            return;
+        }
+
         if (!activeLesson) return;
 
         console.log('[Studio] Running validation for:', activeLesson.title);
@@ -276,10 +300,21 @@ export default function Studio() {
                         onClick={handleRun}
                         disabled={isRunning}
                         variant="primary"
-                        className="px-3 md:px-4 py-1.5 text-xs md:text-sm disabled:opacity-50 !rounded bg-green-600 hover:bg-green-500 shadow-none border-none"
+                        className="gap-2 px-3 md:px-4 py-1.5 text-xs md:text-sm disabled:opacity-50 !rounded bg-green-600 hover:bg-green-500 shadow-none border-none"
                     >
-                        <Play size={14} fill="currentColor" />
-                        {isRunning ? t('studio.compiling') : t('studio.run')}
+                        {isRunning ? (
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : isProjectMode ? (
+                            <>
+                                <Save size={14} />
+                                <span>{language === 'en' ? 'Save' : 'Salvar'}</span>
+                            </>
+                        ) : (
+                            <>
+                                <Play size={14} fill="currentColor" />
+                                <span>{t('studio.run')}</span>
+                            </>
+                        )}
                     </FluidButton>
                 </div>
             </header>

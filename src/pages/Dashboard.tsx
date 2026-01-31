@@ -27,10 +27,148 @@ import {
     CreditCard,
     Mail,
     Key,
-    Sparkles
+    Sparkles,
+    Plus,
+    Folder,
+    Trash2,
+    FileCode
 } from 'lucide-react';
 import { useLangStore } from '@/store/langStore';
 import { supabase } from '@/lib/supabase';
+import { useProjectStore } from '@/store/projectStore';
+
+const ProjectsView = () => {
+    const { projects, fetchProjects, createProject, deleteProject, loading } = useProjectStore();
+    const { setView } = useViewStore();
+    const { language } = useLangStore();
+    const [isCreating, setIsCreating] = useState(false);
+    const [newProjectTitle, setNewProjectTitle] = useState('');
+    const [template, setTemplate] = useState('script');
+
+    useEffect(() => {
+        fetchProjects();
+    }, []);
+
+    const handleCreate = async () => {
+        if (!newProjectTitle.trim()) return;
+        const project = await createProject({
+            title: newProjectTitle,
+            type: template as any,
+            content: template === 'script' ? '// Start coding your mod...' : '{}'
+        });
+        if (project) {
+            setIsCreating(false);
+            setNewProjectTitle('');
+            setView('studio', { projectId: project.id });
+        }
+    };
+
+    return (
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex justify-between items-center">
+                <div>
+                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                        <Folder className="text-liquid-primary" />
+                        {language === 'en' ? 'Project Portfolio' : 'Portfólio de Projetos'}
+                    </h3>
+                    <p className="text-gray-400 text-sm">
+                        {language === 'en' ? 'Manage your personal mods and scripts.' : 'Gerencie seus mods e scripts pessoais.'}
+                    </p>
+                </div>
+                <FluidButton onClick={() => setIsCreating(true)} variant="primary" className="gap-2">
+                    <Plus size={18} />
+                    {language === 'en' ? 'New Project' : 'Novo Projeto'}
+                </FluidButton>
+            </div>
+
+            {/* List */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {projects.map(project => (
+                    <div key={project.id} className="group p-4 rounded-xl bg-black/40 border border-white/10 hover:border-liquid-primary transition-all hover:bg-white/5 relative cursor-pointer" onClick={() => setView('studio', { projectId: project.id })}>
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="p-2 rounded-lg bg-liquid-primary/10 text-liquid-primary">
+                                <FileCode size={20} />
+                            </div>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); if (confirm('Delete?')) deleteProject(project.id); }}
+                                className="text-white/20 hover:text-red-500 transition-colors"
+                            >
+                                <Trash2 size={16} />
+                            </button>
+                        </div>
+                        <h4 className="text-white font-bold mb-1">{project.title}</h4>
+                        <div className="text-xs text-gray-500 bg-white/5 px-2 py-1 rounded inline-block mb-4 uppercase tracking-wider">
+                            {project.type}
+                        </div>
+                        <p className="text-xs text-gray-400 mb-4">
+                            Last edited: {new Date(project.updated_at).toLocaleDateString()}
+                        </p>
+                        <FluidButton
+                            variant="glass"
+                            className="w-full justify-center pointer-events-none group-hover:bg-white/10"
+                        >
+                            {language === 'en' ? 'Open Studio' : 'Abrir Studio'}
+                        </FluidButton>
+                    </div>
+                ))}
+
+                {projects.length === 0 && !loading && (
+                    <div className="col-span-full py-12 text-center text-gray-500 border border-dashed border-white/10 rounded-xl">
+                        <p>{language === 'en' ? 'No projects found. Initialize a new operation.' : 'Nenhum projeto encontrado. Inicie uma nova operação.'}</p>
+                    </div>
+                )}
+            </div>
+
+            {/* Modal Simples (Inline) */}
+            {isCreating && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 text-left">
+                    <div className="bg-gray-900 border border-white/10 rounded-xl p-6 w-full max-w-md space-y-4 shadow-2xl animate-in zoom-in duration-200">
+                        <h3 className="text-xl font-bold text-white mb-4">{language === 'en' ? 'Create New Project' : 'Criar Novo Projeto'}</h3>
+
+                        <div className="flex gap-2 mb-4">
+                            {['script', 'item', 'block'].map(t => (
+                                <button
+                                    key={t}
+                                    onClick={() => setTemplate(t)}
+                                    className={`px-3 py-1 text-xs rounded-full border transition-colors uppercase ${template === t
+                                            ? 'bg-liquid-primary text-black border-liquid-primary font-bold shadow-[0_0_10px_rgba(0,243,255,0.4)]'
+                                            : 'bg-black/40 border-white/20 text-gray-400 hover:border-white/50'
+                                        }`}
+                                >
+                                    {t}
+                                </button>
+                            ))}
+                        </div>
+
+                        <input
+                            autoFocus
+                            type="text"
+                            placeholder={language === 'en' ? "Project Name" : "Nome do Projeto"}
+                            className="w-full bg-black/50 border border-white/20 rounded-lg p-3 text-white focus:border-liquid-primary outline-none"
+                            value={newProjectTitle}
+                            onChange={(e) => setNewProjectTitle(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleCreate();
+                                if (e.key === 'Escape') setIsCreating(false);
+                            }}
+                        />
+                        <div className="flex gap-2 justify-end">
+                            <button
+                                onClick={() => setIsCreating(false)}
+                                className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+                            >
+                                {language === 'en' ? 'Cancel' : 'Cancelar'}
+                            </button>
+                            <FluidButton onClick={handleCreate} disabled={!newProjectTitle.trim()} variant="primary">
+                                {language === 'en' ? 'Create' : 'Criar'}
+                            </FluidButton>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
 
 export default function Dashboard() {
     const { user, profile, signOut } = useAuthStore();
@@ -534,20 +672,22 @@ export default function Dashboard() {
 
                         {activeTab === 'settings' && <SettingsView />}
 
-                        {(activeTab === 'projects' || activeTab === 'docs') && (
+                        {activeTab === 'projects' && <ProjectsView />}
+
+                        {(activeTab === 'docs') && (
                             <div className="flex flex-col items-center justify-center py-20 text-center space-y-6 animate-in fade-in zoom-in duration-500">
                                 <div className="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center border border-white/10 relative overflow-hidden">
                                     <div className="absolute inset-0 bg-liquid-primary/20 blur-xl animate-pulse" />
-                                    <Terminal size={40} className="text-gray-400 relative z-10" />
+                                    <BookOpen size={40} className="text-gray-400 relative z-10" />
                                 </div>
                                 <div className="space-y-2 max-w-md mx-auto">
                                     <h2 className="text-2xl font-bold text-white">
-                                        {language === 'en' ? 'Sector Under Construction' : 'Setor em Construção'}
+                                        {language === 'en' ? 'Knowledge Base Offline' : 'Base de Conhecimento Offline'}
                                     </h2>
                                     <p className="text-gray-400">
                                         {language === 'en'
-                                            ? 'This module is currently being terraformed by the architecture team. Check back later.'
-                                            : 'Este módulo está sendo terraformado pela equipe de arquitetura. Retorne em breve.'}
+                                            ? 'Access to the archives is restricted. Clearance level insufficient.'
+                                            : 'Acesso aos arquivos restrito. Nível de credencial insuficiente.'}
                                     </p>
                                 </div>
                                 <FluidButton

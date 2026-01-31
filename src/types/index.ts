@@ -15,3 +15,14 @@ export interface Module extends ModuleDef {
 export interface Course extends CourseDef {
     modules: Module[];
 }
+
+export interface Project {
+    id: string;
+    user_id: string;
+    title: string;
+    description?: string;
+    type: 'script' | 'item' | 'mob' | 'block';
+    content: string;
+    created_at: string;
+    updated_at: string;
+}

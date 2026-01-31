@@ -5,6 +5,7 @@ type View = 'dashboard' | 'studio' | 'documentation';
 interface ViewContext {
     moduleId?: string;
     lessonId?: string;
+    projectId?: string;
 }
 
 interface ViewState {
