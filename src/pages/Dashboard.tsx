@@ -18,9 +18,12 @@ import {
     Lock,
     Globe,
     Menu,
-    X
+    X,
+    Trash2,
+    AlertTriangle
 } from 'lucide-react';
 import { useLangStore } from '@/store/langStore';
+import { supabase } from '@/lib/supabase';
 
 export default function Dashboard() {
     const { user, profile, signOut } = useAuthStore();
@@ -39,6 +42,9 @@ export default function Dashboard() {
     const { t, language, setLanguage } = useLangStore();
     const [activeTab, setActiveTab] = useState('overview');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [showResetModal, setShowResetModal] = useState(false);
+    const [resetConfirmText, setResetConfirmText] = useState('');
+    const [isResetting, setIsResetting] = useState(false);
 
     useEffect(() => {
         fetchCourses();
@@ -93,7 +99,14 @@ export default function Dashboard() {
                 </nav>
             </div>
 
-            <div className="mt-auto p-6 border-t border-white/10">
+            <div className="mt-auto p-6 border-t border-white/10 space-y-2">
+                <button
+                    onClick={() => setShowResetModal(true)}
+                    className="flex items-center gap-3 text-red-400 hover:text-red-300 transition-colors w-full p-2 rounded-lg hover:bg-red-500/10"
+                >
+                    <Trash2 size={20} />
+                    <span className="font-medium">{language === 'en' ? 'Reset Progress' : 'Resetar Progresso'}</span>
+                </button>
                 <button
                     onClick={() => signOut()}
                     className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors w-full p-2 rounded-lg hover:bg-white/5"
@@ -104,6 +117,43 @@ export default function Dashboard() {
             </div>
         </>
     );
+
+    const handleResetProgress = async () => {
+        if (resetConfirmText !== 'Resetar' || !user) return;
+
+        setIsResetting(true);
+        try {
+            // 1. Delete all user progress records
+            const { error: progressError } = await supabase
+                .from('user_progress')
+                .delete()
+                .eq('user_id', user.id);
+
+            if (progressError) throw progressError;
+
+            // 2. Reset profile XP and streak
+            const { error: profileError } = await supabase
+                .from('profiles')
+                .update({ xp: 0, streak: 0, level: 1 })
+                .eq('id', user.id);
+
+            if (profileError) throw profileError;
+
+            // 3. Refresh local state
+            await fetchUserProgress(user.id);
+            await useAuthStore.getState().refreshProfile();
+
+            // 4. Close modal and reset
+            setShowResetModal(false);
+            setResetConfirmText('');
+
+            console.log('[Dashboard] Progress reset successfully!');
+        } catch (err) {
+            console.error('[Dashboard] Error resetting progress:', err);
+        } finally {
+            setIsResetting(false);
+        }
+    };
 
     return (
         <GlassLayout>
@@ -293,6 +343,85 @@ export default function Dashboard() {
                     </div>
                 </main>
             </div>
+
+            {/* Reset Progress Modal */}
+            <AnimatePresence>
+                {showResetModal && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => { setShowResetModal(false); setResetConfirmText(''); }}
+                            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="fixed inset-0 z-[101] flex items-center justify-center p-4"
+                        >
+                            <div className="bg-[#1a1a2e] border border-red-500/30 rounded-2xl p-6 max-w-md w-full shadow-2xl">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+                                        <AlertTriangle className="w-6 h-6 text-red-500" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-white">
+                                            {language === 'en' ? 'Reset All Progress' : 'Resetar Todo Progresso'}
+                                        </h3>
+                                        <p className="text-sm text-gray-400">
+                                            {language === 'en' ? 'This action cannot be undone' : 'Esta ação não pode ser desfeita'}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <p className="text-gray-300 mb-4">
+                                    {language === 'en'
+                                        ? 'This will permanently delete all your progress, XP, and streak data.'
+                                        : 'Isso irá deletar permanentemente todo seu progresso, XP e dados de streak.'}
+                                </p>
+
+                                <div className="mb-4">
+                                    <label className="block text-sm text-gray-400 mb-2">
+                                        {language === 'en'
+                                            ? 'Type "Resetar" to confirm:'
+                                            : 'Digite "Resetar" para confirmar:'}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={resetConfirmText}
+                                        onChange={(e) => setResetConfirmText(e.target.value)}
+                                        placeholder="Resetar"
+                                        className="w-full px-4 py-3 bg-black/50 border border-white/10 rounded-lg text-white placeholder:text-gray-600 focus:outline-none focus:border-red-500/50"
+                                    />
+                                </div>
+
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => { setShowResetModal(false); setResetConfirmText(''); }}
+                                        className="flex-1 px-4 py-3 rounded-lg bg-white/5 text-gray-300 hover:bg-white/10 transition-colors"
+                                    >
+                                        {language === 'en' ? 'Cancel' : 'Cancelar'}
+                                    </button>
+                                    <button
+                                        onClick={handleResetProgress}
+                                        disabled={resetConfirmText !== 'Resetar' || isResetting}
+                                        className={`flex-1 px-4 py-3 rounded-lg font-semibold transition-all ${resetConfirmText === 'Resetar' && !isResetting
+                                                ? 'bg-red-500 text-white hover:bg-red-600'
+                                                : 'bg-red-500/20 text-red-500/50 cursor-not-allowed'
+                                            }`}
+                                    >
+                                        {isResetting
+                                            ? (language === 'en' ? 'Resetting...' : 'Resetando...')
+                                            : (language === 'en' ? 'Reset Progress' : 'Resetar Progresso')}
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
         </GlassLayout>
     );
 }
