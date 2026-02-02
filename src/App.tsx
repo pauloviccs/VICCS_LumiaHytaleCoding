@@ -3,6 +3,7 @@ import LandingPage from '@/pages/LandingPage';
 import Dashboard from '@/pages/Dashboard';
 import Studio from '@/pages/Studio';
 import Documentation from '@/pages/Documentation';
+import Settings from '@/pages/Settings';
 import { useAuthStore } from '@/store/authStore';
 import { useViewStore } from '@/store/viewStore';
 import { AmbientBackground } from '@/components/layout/AmbientBackground';
@@ -30,6 +31,7 @@ function App() {
       <AmbientBackground />
       {currentView === 'dashboard' && user && <Dashboard />}
       {currentView === 'studio' && user && <Studio />}
+      {currentView === 'settings' && user && <Settings />}
       {((currentView as string) === 'documentation' || (!user && (currentView as string) === 'documentation')) && <Documentation />}
       {!user && (currentView as string) !== 'documentation' && <LandingPage />}
     </>

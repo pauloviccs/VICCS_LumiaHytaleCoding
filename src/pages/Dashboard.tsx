@@ -34,10 +34,13 @@ import {
     FileCode,
     Box
 } from 'lucide-react';
+
 import { useLangStore } from '@/store/langStore';
 import { supabase } from '@/lib/supabase';
 import { useProjectStore } from '@/store/projectStore';
 import { BlockbenchGuide } from './BlockbenchGuide';
+import { AvatarUpload } from '@/components/profile/AvatarUpload';
+
 
 const ProjectsView = () => {
     const { projects, fetchProjects, createProject, deleteProject, loading } = useProjectStore();
@@ -329,21 +332,13 @@ export default function Dashboard() {
                     {language === 'en' ? 'Identity Protocol' : 'Protocolo de Identidade'}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 rounded-xl bg-black/40 border border-white/10 flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-liquid-primary to-purple-500 p-[1px]">
-                            <img
-                                src={profile?.avatar_url || user?.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/shapes/svg?seed=${user?.email}`}
-                                alt="Avatar"
-                                className="w-full h-full rounded-full object-cover bg-black"
-                            />
+                    <div className="p-4 rounded-xl bg-black/40 border border-white/10 flex flex-col items-center justify-center min-h-[180px]">
+                        <div className="text-xs text-gray-500 uppercase tracking-widest mb-3">
+                            {language === 'en' ? 'PROFILE PICTURE' : 'FOTO DE PERFIL'}
                         </div>
-                        <div>
-                            <div className="text-xs text-gray-500 uppercase tracking-widest mb-1">AVATAR</div>
-                            <button className="text-sm text-liquid-primary hover:text-white transition-colors">
-                                {language === 'en' ? 'Regenerate Signature' : 'Regenerar Assinatura'}
-                            </button>
-                        </div>
+                        <AvatarUpload currentAvatarUrl={profile?.avatar_url} />
                     </div>
+
                     <div className="p-4 rounded-xl bg-black/40 border border-white/10">
                         <div className="text-xs text-gray-500 uppercase tracking-widest mb-2 flex justify-between items-center">
                             CODENAME
