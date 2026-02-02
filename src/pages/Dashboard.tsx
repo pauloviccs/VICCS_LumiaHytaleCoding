@@ -33,7 +33,11 @@ import {
     Folder,
     Trash2,
     FileCode,
-    Rocket
+    Rocket,
+    Eye,
+    EyeOff,
+    Copy,
+    Gift
 } from 'lucide-react';
 
 import { useLangStore } from '@/store/langStore';
@@ -280,6 +284,16 @@ export default function Dashboard() {
     const [usernameInput, setUsernameInput] = useState('');
     const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
 
+    // Access Key state
+    const [showAccessKey, setShowAccessKey] = useState(false);
+    const [accessKeyCopied, setAccessKeyCopied] = useState(false);
+
+    // Gift Code state
+    const [giftCode, setGiftCode] = useState('');
+    const [redeemingCode, setRedeemingCode] = useState(false);
+    const [redeemStatus, setRedeemStatus] = useState<'idle' | 'success' | 'error'>('idle');
+    const [redeemMessage, setRedeemMessage] = useState('');
+
     const handleUpdateUsername = async () => {
         if (!usernameInput.trim() || !user) return;
         setIsUpdatingProfile(true);
@@ -391,25 +405,45 @@ export default function Dashboard() {
                 </h3>
                 <div className="p-6 rounded-xl bg-black/40 border border-white/10 space-y-4">
                     <div className="flex flex-col md:flex-row gap-4 items-center">
-                        <Mail className="text-gray-500" />
+                        <Mail className="text-gray-500 shrink-0" />
                         <div className="flex-1 w-full">
                             <div className="text-xs text-gray-500 uppercase">Registered Email</div>
                             <div className="text-white font-mono">{user?.email}</div>
                         </div>
-                        <FluidButton variant="secondary" className="w-full md:w-auto text-xs">
-                            {language === 'en' ? 'Update Email' : 'Atualizar Email'}
-                        </FluidButton>
                     </div>
                     <div className="h-px bg-white/5" />
                     <div className="flex flex-col md:flex-row gap-4 items-center">
-                        <Key className="text-gray-500" />
-                        <div className="flex-1 w-full">
-                            <div className="text-xs text-gray-500 uppercase">Access Key</div>
-                            <div className="text-white font-mono">••••••••••••••••</div>
+                        <Key className="text-gray-500 shrink-0" />
+                        <div className="flex-1 w-full min-w-0">
+                            <div className="text-xs text-gray-500 uppercase">{language === 'en' ? 'Access Key' : 'Chave de Acesso'}</div>
+                            <div className="text-white font-mono text-sm truncate">
+                                {showAccessKey ? user?.id : '••••••••••••••••••••••••••••••••••••'}
+                            </div>
                         </div>
-                        <FluidButton variant="secondary" className="w-full md:w-auto text-xs">
-                            {language === 'en' ? 'Rotate Key' : 'Redefinir Senha'}
-                        </FluidButton>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setShowAccessKey(!showAccessKey)}
+                                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                                title={showAccessKey ? (language === 'en' ? 'Hide' : 'Ocultar') : (language === 'en' ? 'Reveal' : 'Revelar')}
+                            >
+                                {showAccessKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                            <button
+                                onClick={async () => {
+                                    if (!user?.id) return;
+                                    await navigator.clipboard.writeText(user.id);
+                                    setAccessKeyCopied(true);
+                                    setTimeout(() => setAccessKeyCopied(false), 2000);
+                                }}
+                                className={`p-2 rounded-lg transition-colors ${accessKeyCopied
+                                    ? 'bg-green-500/20 text-green-400'
+                                    : 'bg-white/5 hover:bg-white/10'
+                                    }`}
+                                title={accessKeyCopied ? (language === 'en' ? 'Copied!' : 'Copiado!') : (language === 'en' ? 'Copy' : 'Copiar')}
+                            >
+                                {accessKeyCopied ? <Check size={16} /> : <Copy size={16} />}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -447,6 +481,77 @@ export default function Dashboard() {
                         <span>•</span>
                         <span>Valid until 2077</span>
                     </div>
+                </div>
+            </div>
+
+            {/* Gift Code Section */}
+            <div className="space-y-4">
+                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                    <Gift className="text-liquid-primary" />
+                    {language === 'en' ? 'Gift Code' : 'Código de Presente'}
+                </h3>
+                <div className="p-6 rounded-xl bg-black/40 border border-white/10">
+                    <p className="text-gray-400 text-sm mb-4">
+                        {language === 'en'
+                            ? 'Enter a gift code to unlock premium features and tier upgrades.'
+                            : 'Digite um código de presente para desbloquear recursos premium e upgrades de tier.'}
+                    </p>
+                    <div className="flex gap-3">
+                        <input
+                            type="text"
+                            value={giftCode}
+                            onChange={(e) => setGiftCode(e.target.value.toUpperCase())}
+                            placeholder={language === 'en' ? 'Enter code...' : 'Digite o código...'}
+                            disabled={redeemingCode}
+                            className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-liquid-primary/50 focus:outline-none focus:ring-1 focus:ring-liquid-primary/30 transition-colors font-mono uppercase tracking-wider disabled:opacity-50"
+                        />
+                        <button
+                            onClick={async () => {
+                                if (!giftCode.trim() || redeemingCode) return;
+                                setRedeemingCode(true);
+                                setRedeemStatus('idle');
+                                setRedeemMessage('');
+
+                                try {
+                                    const { data, error } = await supabase.functions.invoke('redeem-giftcode', {
+                                        body: { code: giftCode.trim() }
+                                    });
+
+                                    if (error) throw error;
+
+                                    if (data?.success) {
+                                        setRedeemStatus('success');
+                                        setRedeemMessage(data.message || (language === 'en' ? 'Code redeemed!' : 'Código resgatado!'));
+                                        setGiftCode('');
+                                        await useAuthStore.getState().refreshProfile();
+                                    } else {
+                                        throw new Error(data?.error || 'Unknown error');
+                                    }
+                                } catch (err: any) {
+                                    console.error('Failed to redeem code:', err);
+                                    setRedeemStatus('error');
+                                    setRedeemMessage(err.message || (language === 'en' ? 'Failed to redeem' : 'Falha ao resgatar'));
+                                } finally {
+                                    setRedeemingCode(false);
+                                    setTimeout(() => {
+                                        setRedeemStatus('idle');
+                                        setRedeemMessage('');
+                                    }, 5000);
+                                }
+                            }}
+                            disabled={!giftCode.trim() || redeemingCode}
+                            className="px-6 py-3 rounded-xl bg-liquid-primary text-black font-medium hover:bg-liquid-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {redeemingCode
+                                ? (language === 'en' ? 'Redeeming...' : 'Resgatando...')
+                                : (language === 'en' ? 'Redeem' : 'Resgatar')}
+                        </button>
+                    </div>
+                    {redeemMessage && (
+                        <div className={`mt-3 text-sm font-medium ${redeemStatus === 'success' ? 'text-green-400' : 'text-red-400'}`}>
+                            {redeemMessage}
+                        </div>
+                    )}
                 </div>
             </div>
 
