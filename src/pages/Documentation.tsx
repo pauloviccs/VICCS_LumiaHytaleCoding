@@ -14,7 +14,7 @@ export default function Documentation() {
 
     return (
         <GlassLayout>
-            <div className="flex flex-col h-screen pt-20">
+            <div className="flex flex-col h-screen">
                 {/* Top Bar */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-black/20 backdrop-blur-md">
                     <button
