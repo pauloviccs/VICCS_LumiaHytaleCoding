@@ -152,7 +152,7 @@ export const useCourseStore = create<CourseState>((set, get) => ({
         // Find the course to get total modules/lessons (if we had that data)
         const course = courses.find(c => c.id === courseId);
         if (!course) {
-            console.log('[getCourseProgress] Course not found:', courseId);
+            // console.log('[getCourseProgress] Course not found:', courseId);
             return 0;
         }
 
@@ -169,7 +169,7 @@ export const useCourseStore = create<CourseState>((set, get) => ({
                 .map(p => p.lesson_id)
         );
 
-        console.log('[getCourseProgress] Completed lessons for course:', completedLessonIds.size, 'userProgress:', userProgress);
+        // console.log('[getCourseProgress] Completed lessons for course:', completedLessonIds.size, 'userProgress:', userProgress);
 
         // Estimate total lessons. 
         // If we have course data loaded, we can count available lessons in modules
@@ -184,12 +184,12 @@ export const useCourseStore = create<CourseState>((set, get) => ({
             }
         });
 
-        console.log('[getCourseProgress] Total lessons estimate:', totalLessons, 'modules:', course.modules.length);
+        // console.log('[getCourseProgress] Total lessons estimate:', totalLessons, 'modules:', course.modules.length);
 
         if (totalLessons === 0) return 0;
 
         const pct = Math.round((completedLessonIds.size / totalLessons) * 100);
-        console.log('[getCourseProgress] Calculated percentage:', pct);
+        // console.log('[getCourseProgress] Calculated percentage:', pct);
         return Math.min(100, pct);
     },
 

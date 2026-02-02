@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Globe } from 'lucide-react';
+import { Menu, X, Globe, LayoutDashboard } from 'lucide-react';
 import { useLangStore } from '@/store/langStore';
+import { useAuthStore } from '@/store/authStore';
+import { useViewStore } from '@/store/viewStore';
 
 // Discord SVG icon
 const DiscordIcon = ({ size = 16 }: { size?: number }) => (
@@ -18,6 +20,8 @@ export const Navbar = ({ onOpenAuth }: NavbarProps) => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { language, setLanguage } = useLangStore();
+    const { user, profile } = useAuthStore();
+    const { setView } = useViewStore();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -76,21 +80,51 @@ export const Navbar = ({ onOpenAuth }: NavbarProps) => {
 
                         <div className="h-6 w-px bg-white/10" />
 
-                        <button
-                            onClick={onOpenAuth}
-                            className="text-gray-300 hover:text-white font-medium transition-colors"
-                        >
-                            Log In
-                        </button>
-                        <button
-                            onClick={onOpenAuth}
-                            className="relative px-6 py-2 bg-white/5 border border-white/10 rounded-sm overflow-hidden group hover:border-liquid-primary/50 transition-all duration-300"
-                        >
-                            <div className="absolute inset-0 bg-gradient-to-r from-liquid-primary/20 to-liquid-accent/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                            <span className="relative font-bold tracking-wide text-white group-hover:text-liquid-primary transition-colors">
-                                START CODING
-                            </span>
-                        </button>
+                        <div className="h-6 w-px bg-white/10" />
+
+                        {user ? (
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-3 pl-2 pr-1 py-1 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer" onClick={() => setView('dashboard')}>
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-liquid-primary to-liquid-accent p-[1px]">
+                                        <div className="w-full h-full rounded-full bg-black overflow-hidden">
+                                            <img
+                                                src={profile?.avatar_url || user?.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/shapes/svg?seed=${user?.email}`}
+                                                alt="Avatar"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                    </div>
+                                    <span className="text-sm font-bold text-white pr-2 max-w-[100px] truncate">
+                                        {profile?.username || user.email?.split('@')[0]}
+                                    </span>
+                                </div>
+                                <button
+                                    onClick={() => setView('dashboard')}
+                                    className="p-2 text-gray-400 hover:text-liquid-primary transition-colors"
+                                    title="Dashboard"
+                                >
+                                    <LayoutDashboard size={20} />
+                                </button>
+                            </div>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={onOpenAuth}
+                                    className="text-gray-300 hover:text-white font-medium transition-colors"
+                                >
+                                    Log In
+                                </button>
+                                <button
+                                    onClick={onOpenAuth}
+                                    className="relative px-6 py-2 bg-white/5 border border-white/10 rounded-sm overflow-hidden group hover:border-liquid-primary/50 transition-all duration-300"
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-r from-liquid-primary/20 to-liquid-accent/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                    <span className="relative font-bold tracking-wide text-white group-hover:text-liquid-primary transition-colors">
+                                        START CODING
+                                    </span>
+                                </button>
+                            </>
+                        )}
                     </div>
 
                     {/* Mobile Menu Toggle */}
@@ -137,12 +171,33 @@ export const Navbar = ({ onOpenAuth }: NavbarProps) => {
                             Discord Community
                         </a>
 
-                        <button className="w-full py-4 text-center font-bold text-lg border border-white/10 rounded-lg hover:bg-white/5 active:scale-95 transition-all">
-                            Log In
-                        </button>
-                        <button className="w-full py-4 text-center font-bold text-lg bg-liquid-primary/20 text-liquid-primary border border-liquid-primary/30 rounded-lg shadow-[0_0_20px_rgba(0,243,255,0.2)] active:scale-95 transition-all">
-                            START CODING
-                        </button>
+                        {user ? (
+                            <button
+                                onClick={() => {
+                                    setView('dashboard');
+                                    setIsMobileMenuOpen(false);
+                                }}
+                                className="w-full py-4 flex items-center justify-center gap-2 font-bold text-lg bg-liquid-primary/20 text-liquid-primary border border-liquid-primary/30 rounded-lg shadow-[0_0_20px_rgba(0,243,255,0.2)] active:scale-95 transition-all"
+                            >
+                                <LayoutDashboard size={20} />
+                                {language === 'en' ? 'GO TO DASHBOARD' : 'IR PARA O DASHBOARD'}
+                            </button>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={onOpenAuth}
+                                    className="w-full py-4 text-center font-bold text-lg border border-white/10 rounded-lg hover:bg-white/5 active:scale-95 transition-all"
+                                >
+                                    Log In
+                                </button>
+                                <button
+                                    onClick={onOpenAuth}
+                                    className="w-full py-4 text-center font-bold text-lg bg-liquid-primary/20 text-liquid-primary border border-liquid-primary/30 rounded-lg shadow-[0_0_20px_rgba(0,243,255,0.2)] active:scale-95 transition-all"
+                                >
+                                    START CODING
+                                </button>
+                            </>
+                        )}
                     </motion.div>
                 )}
             </AnimatePresence>

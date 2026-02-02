@@ -24,10 +24,14 @@ export default function PricingPage() {
         setLoading(true);
         try {
             // Chamar Edge Function para criar preferência
+            const { data: { session } } = await supabase.auth.getSession();
             const { data, error } = await supabase.functions.invoke('create-preference', {
                 body: {
                     user_id: user.id,
                     email: user.email
+                },
+                headers: {
+                    Authorization: `Bearer ${session?.access_token}`
                 }
             });
 
