@@ -49,7 +49,6 @@ export const Navbar = ({ onOpenAuth }: NavbarProps) => {
                     {/* Desktop Links */}
                     <div className="hidden md:flex items-center gap-8">
                         <NavLink href="#features">Features</NavLink>
-                        <NavLink href="#curriculum">Curriculum</NavLink>
                         <NavLink href="#pricing">Pricing</NavLink>
                     </div>
 
@@ -114,7 +113,6 @@ export const Navbar = ({ onOpenAuth }: NavbarProps) => {
                         className="fixed inset-0 z-40 bg-liquid-bg/95 backdrop-blur-xl pt-24 px-6 md:hidden flex flex-col gap-6"
                     >
                         <MobileNavLink onClick={() => setIsMobileMenuOpen(false)} href="#features">Features</MobileNavLink>
-                        <MobileNavLink onClick={() => setIsMobileMenuOpen(false)} href="#curriculum">Curriculum</MobileNavLink>
                         <MobileNavLink onClick={() => setIsMobileMenuOpen(false)} href="#pricing">Pricing</MobileNavLink>
 
                         <div className="h-px bg-white/10 my-2" />

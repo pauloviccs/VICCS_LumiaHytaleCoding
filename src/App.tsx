@@ -3,6 +3,7 @@ import LandingPage from '@/pages/LandingPage';
 import Dashboard from '@/pages/Dashboard';
 import Studio from '@/pages/Studio';
 import Documentation from '@/pages/Documentation';
+import PricingPage from '@/pages/PricingPage';
 import Settings from '@/pages/Settings';
 import { useAuthStore } from '@/store/authStore';
 import { useViewStore } from '@/store/viewStore';
@@ -24,7 +25,7 @@ function App() {
     );
   }
 
-  if (!user && (currentView as string) !== 'documentation') return <LandingPage />;
+  if (!user && (currentView as string) !== 'documentation' && (currentView as string) !== 'pricing') return <LandingPage />;
 
   return (
     <>
@@ -32,8 +33,9 @@ function App() {
       {currentView === 'dashboard' && user && <Dashboard />}
       {currentView === 'studio' && user && <Studio />}
       {currentView === 'settings' && user && <Settings />}
+      {(currentView as string) === 'pricing' && <PricingPage />}
       {((currentView as string) === 'documentation' || (!user && (currentView as string) === 'documentation')) && <Documentation />}
-      {!user && (currentView as string) !== 'documentation' && <LandingPage />}
+      {!user && (currentView as string) !== 'documentation' && (currentView as string) !== 'pricing' && <LandingPage />}
     </>
   )
 }

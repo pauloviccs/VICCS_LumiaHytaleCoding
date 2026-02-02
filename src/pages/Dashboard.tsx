@@ -32,7 +32,7 @@ import {
     Folder,
     Trash2,
     FileCode,
-    Box
+    Rocket
 } from 'lucide-react';
 
 import { useLangStore } from '@/store/langStore';
@@ -421,23 +421,25 @@ export default function Dashboard() {
                 </h3>
                 <div className="relative p-6 rounded-xl border border-yellow-500/30 bg-gradient-to-br from-yellow-500/5 to-transparent overflow-hidden">
                     <div className="absolute top-0 right-0 p-4">
-                        <div className="px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-500 text-xs font-bold border border-yellow-500/30">
-                            FREE TIER
+                        <div className={`px-3 py-1 rounded-full text-xs font-bold border ${profile?.tier === 'dev' ? 'bg-liquid-primary/20 text-liquid-primary border-liquid-primary/30' : 'bg-yellow-500/20 text-yellow-500 border-yellow-500/30'}`}>
+                            {profile?.tier === 'dev' ? 'DEV TIER' : 'FREE TIER'}
                         </div>
                     </div>
                     <div className="flex items-center gap-4 mb-4">
                         <div className="w-12 h-12 rounded-lg bg-yellow-500/20 flex items-center justify-center">
-                            <Sparkles className="text-yellow-500" />
+                            {profile?.tier === 'dev' ? <Rocket className="text-liquid-primary" /> : <Sparkles className="text-yellow-500" />}
                         </div>
                         <div>
                             <div className="text-2xl font-bold text-white">Lumina Agent</div>
-                            <div className="text-yellow-500/80 text-sm">Level 1 Clearance</div>
+                            <div className={`${profile?.tier === 'dev' ? 'text-liquid-primary' : 'text-yellow-500/80'} text-sm`}>
+                                {profile?.tier === 'dev' ? 'Dev Clearance' : 'Level 1 Clearance'}
+                            </div>
                         </div>
                     </div>
                     <p className="text-gray-400 text-sm mb-6 max-w-lg">
                         {language === 'en'
-                            ? 'You have basic access to all training modules and standard cloud storage.'
-                            : 'Você tem acesso básico a todos os módulos de treinamento e armazenamento padrão na nuvem.'}
+                            ? (profile?.tier === 'dev' ? 'You have full access to all modules and source codes.' : 'You have basic access to all training modules and standard cloud storage.')
+                            : (profile?.tier === 'dev' ? 'Você tem acesso total a todos os módulos e códigos fonte.' : 'Você tem acesso básico a todos os módulos de treinamento e armazenamento padrão na nuvem.')}
                     </p>
                     <div className="flex items-center gap-4 text-sm text-gray-500">
                         <span>Running on local instances</span>
@@ -659,17 +661,41 @@ export default function Dashboard() {
                                     <FluidCard className="border border-white/10 opacity-70">
                                         <h3 className="text-lg md:text-xl font-bold text-white mb-6">{t('dash.upcoming')}</h3>
                                         <div className="space-y-4">
-                                            {activeCourse?.modules.slice(1).map((module: any) => {
-                                                const locked = isModuleLocked(module.id);
+                                            {activeCourse?.modules.slice(1).map((module: any, mapIndex: number) => {
+                                                const actualIndex = mapIndex + 1; // slice(1) starts at index 1
+                                                const isPaywalled = actualIndex >= 6 && profile?.tier === 'free';
+                                                const isSequentiallyLocked = isModuleLocked(module.id);
+                                                const locked = isPaywalled || isSequentiallyLocked;
+
                                                 return (
                                                     <div key={module.id} className={`p-4 border border-white/5 rounded-lg bg-black/20 flex items-center gap-4 ${locked ? 'opacity-50' : ''}`}>
-                                                        {locked ? <Lock className="text-gray-600 shrink-0" size={20} /> : <div className="w-5 h-5 rounded-full border border-green-500/50 bg-green-500/20" />}
-                                                        <div className="min-w-0">
-                                                            <div className="text-gray-400 font-medium truncate">
-                                                                {language === 'en' ? (module.title_en || module.title) : module.title}
+                                                        {locked ? (
+                                                            isPaywalled ? <Lock className="text-liquid-primary shrink-0" size={20} /> : <Lock className="text-gray-600 shrink-0" size={20} />
+                                                        ) : (
+                                                            <div className="w-5 h-5 rounded-full border border-green-500/50 bg-green-500/20" />
+                                                        )}
+                                                        <div className="min-w-0 flex-1">
+                                                            <div className="flex justify-between items-center">
+                                                                <div className="text-gray-400 font-medium truncate">
+                                                                    {language === 'en' ? (module.title_en || module.title) : module.title}
+                                                                </div>
+                                                                {isPaywalled && (
+                                                                    <span className="text-[10px] font-bold text-liquid-primary border border-liquid-primary/30 px-1.5 py-0.5 rounded ml-2">DEV</span>
+                                                                )}
                                                             </div>
-                                                            <div className="text-xs text-gray-600 truncate">
-                                                                {locked ? t('dash.locked') : t('dash.unlocked')}
+                                                            <div className="text-xs text-gray-600 truncate flex items-center gap-2">
+                                                                {locked
+                                                                    ? (isPaywalled ? (language === 'en' ? 'Dev Access Only' : 'Acesso Dev Necessário') : t('dash.locked'))
+                                                                    : t('dash.unlocked')}
+
+                                                                {isPaywalled && (
+                                                                    <button
+                                                                        onClick={() => setView('pricing')}
+                                                                        className="text-liquid-primary hover:underline font-bold"
+                                                                    >
+                                                                        UPGRADE
+                                                                    </button>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     </div>
