@@ -23,21 +23,36 @@ export default function PricingPage() {
 
         setLoading(true);
         try {
-            // Chamar Edge Function para criar preferência
-            const { data: { session } } = await supabase.auth.getSession();
+            // Verificar se há sessão ativa
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+            if (sessionError || !session) {
+                console.error('No active session:', sessionError);
+                setIsAuthOpen(true);
+                return;
+            }
+
+            console.log('[Payment] Session found, invoking Edge Function...');
+
+            // O supabase.functions.invoke já inclui o token automaticamente
+            // NÃO passe headers customizados pois isso substitui o default
             const { data, error } = await supabase.functions.invoke('create-preference', {
                 body: {
                     user_id: user.id,
                     email: user.email
-                },
-                headers: {
-                    Authorization: `Bearer ${session?.access_token}`
                 }
             });
 
-            if (error) throw error;
+            if (error) {
+                console.error('[Payment] Function error:', error);
+                throw error;
+            }
+
+            console.log('[Payment] Preference created, redirecting...');
             if (data?.init_point) {
                 window.location.href = data.init_point;
+            } else {
+                throw new Error('No init_point in response');
             }
         } catch (err) {
             console.error('Upgrade Error:', err);
