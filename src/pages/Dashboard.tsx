@@ -512,26 +512,49 @@ export default function Dashboard() {
                                 setRedeemStatus('idle');
                                 setRedeemMessage('');
 
+                                console.log('[GiftCode] Starting redemption for:', giftCode.trim());
+
                                 try {
                                     const { data, error } = await supabase.functions.invoke('redeem-giftcode', {
                                         body: { code: giftCode.trim() }
                                     });
 
-                                    if (error) throw error;
+                                    console.log('[GiftCode] Response:', { data, error });
+
+                                    // Handle FunctionsHttpError - check error first
+                                    if (error) {
+                                        console.error('[GiftCode] Function error:', error);
+                                        // Try to extract error message from response
+                                        let errorMessage = error.message || 'Request failed';
+                                        if (error.context?.json) {
+                                            try {
+                                                const errorData = await error.context.json();
+                                                errorMessage = errorData.error || errorMessage;
+                                            } catch { }
+                                        }
+                                        throw new Error(errorMessage);
+                                    }
+
+                                    // Check for error in data response
+                                    if (data?.error) {
+                                        throw new Error(data.error);
+                                    }
 
                                     if (data?.success) {
+                                        console.log('[GiftCode] Success! Tier:', data.tier);
                                         setRedeemStatus('success');
                                         setRedeemMessage(data.message || (language === 'en' ? 'Code redeemed!' : 'Código resgatado!'));
                                         setGiftCode('');
                                         await useAuthStore.getState().refreshProfile();
                                     } else {
-                                        throw new Error(data?.error || 'Unknown error');
+                                        throw new Error('Unknown response format');
                                     }
                                 } catch (err: any) {
-                                    console.error('Failed to redeem code:', err);
+                                    console.error('[GiftCode] Error:', err);
                                     setRedeemStatus('error');
                                     setRedeemMessage(err.message || (language === 'en' ? 'Failed to redeem' : 'Falha ao resgatar'));
                                 } finally {
+                                    console.log('[GiftCode] Finishing, setting redeemingCode to false');
                                     setRedeemingCode(false);
                                     setTimeout(() => {
                                         setRedeemStatus('idle');
