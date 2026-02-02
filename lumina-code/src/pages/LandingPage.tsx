@@ -93,11 +93,11 @@ function LandingPage() {
                             {t('hero.system_online')}
                         </div>
 
-                        <h1 className="text-5xl sm:text-6xl md:text-8xl font-black tracking-tighter leading-[0.9]">
+                        <h1 className="text-5xl sm:text-6xl md:text-8xl font-black tracking-tight leading-none">
                             {language === 'en' ? (
                                 <>
                                     CODE <br />
-                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-liquid-primary via-white to-liquid-accent animate-pulse-glow">
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-liquid-primary via-white to-liquid-accent">
                                         LIQUID
                                     </span> <br />
                                     BUILD <br />
@@ -108,7 +108,7 @@ function LandingPage() {
                             ) : (
                                 <>
                                     CÓDIGO <br />
-                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-liquid-primary via-white to-liquid-accent animate-pulse-glow">
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-liquid-primary via-white to-liquid-accent">
                                         LÍQUIDO
                                     </span> <br />
                                     CRIE <br />

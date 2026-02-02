@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type View = 'dashboard' | 'studio' | 'documentation' | 'settings';
+type View = 'dashboard' | 'studio' | 'documentation' | 'settings' | 'pricing';
 
 
 interface ViewContext {

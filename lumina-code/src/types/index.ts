@@ -1,6 +1,9 @@
 import type { Database } from './supabase';
 
-export type Profile = Database['public']['Tables']['profiles']['Row'];
+export type Profile = Database['public']['Tables']['profiles']['Row'] & {
+    tier?: 'free' | 'dev';
+    tier_upgraded_at?: string;
+};
 export type CourseDef = Database['public']['Tables']['courses']['Row'];
 export type ModuleDef = Database['public']['Tables']['modules']['Row'];
 export type Lesson = Database['public']['Tables']['lessons']['Row'];
