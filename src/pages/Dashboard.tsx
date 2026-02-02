@@ -249,7 +249,6 @@ export default function Dashboard() {
 
                 <nav className="space-y-2">
                     <NavButton icon={<Dna size={20} />} label={t('dash.nav.overview')} active={activeTab === 'overview'} onClick={() => { setActiveTab('overview'); setIsSidebarOpen(false); }} />
-                    <NavButton icon={<Terminal size={20} />} label={t('dash.nav.projects')} active={activeTab === 'projects'} onClick={() => { setActiveTab('projects'); setIsSidebarOpen(false); }} />
                     <NavButton icon={<Box size={20} />} label={language === 'en' ? 'Blockbench Guide' : 'Manual Blockbench'} active={activeTab === 'blockbench'} onClick={() => { setActiveTab('blockbench'); setIsSidebarOpen(false); }} />
                     <NavButton icon={<BookOpen size={20} />} label={t('dash.nav.docs')} active={activeTab === 'docs'} onClick={() => { setActiveTab('docs'); setIsSidebarOpen(false); }} />
                     <NavButton icon={<Settings size={20} />} label={t('dash.nav.settings')} active={activeTab === 'settings'} onClick={() => { setActiveTab('settings'); setIsSidebarOpen(false); }} />
