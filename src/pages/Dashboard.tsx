@@ -40,6 +40,7 @@ import { supabase } from '@/lib/supabase';
 import { useProjectStore } from '@/store/projectStore';
 import { BlockbenchGuide } from './BlockbenchGuide';
 import { AvatarUpload } from '@/components/profile/AvatarUpload';
+import { KnowledgeBase } from '@/components/docs/KnowledgeBase';
 
 
 const ProjectsView = () => {
@@ -676,31 +677,7 @@ export default function Dashboard() {
 
                         {activeTab === 'blockbench' && <BlockbenchGuide />}
 
-                        {(activeTab === 'docs') && (
-                            <div className="flex flex-col items-center justify-center py-20 text-center space-y-6 animate-in fade-in zoom-in duration-500">
-                                <div className="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center border border-white/10 relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-liquid-primary/20 blur-xl animate-pulse" />
-                                    <BookOpen size={40} className="text-gray-400 relative z-10" />
-                                </div>
-                                <div className="space-y-2 max-w-md mx-auto">
-                                    <h2 className="text-2xl font-bold text-white">
-                                        {language === 'en' ? 'Knowledge Base Offline' : 'Base de Conhecimento Offline'}
-                                    </h2>
-                                    <p className="text-gray-400">
-                                        {language === 'en'
-                                            ? 'Access to the archives is restricted. Clearance level insufficient.'
-                                            : 'Acesso aos arquivos restrito. Nível de credencial insuficiente.'}
-                                    </p>
-                                </div>
-                                <FluidButton
-                                    onClick={() => setActiveTab('overview')}
-                                    variant="glass"
-                                    className="px-8"
-                                >
-                                    {language === 'en' ? 'Return to Command' : 'Retornar ao Comando'}
-                                </FluidButton>
-                            </div>
-                        )}
+                        {(activeTab === 'docs') && <KnowledgeBase />}
                     </div>
                 </main>
             </div>
