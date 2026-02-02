@@ -28,6 +28,7 @@ import {
     Mail,
     Key,
     Sparkles,
+    Box,
     Plus,
     Folder,
     Trash2,
